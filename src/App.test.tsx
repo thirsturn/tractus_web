@@ -1,15 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import App from './App';
+import { AuthProvider } from './context/AuthContext';
 
 describe('App Routing', () => {
-  it('renders the DashboardLayout by default on root path', () => {
-    render(<App />);
+  it('redirects to login by default on root path since unauthenticated', () => {
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    );
     
-    // It should render the Sidebar (Tractus Spaces)
-    expect(screen.getByText('Tractus Spaces')).toBeInTheDocument();
-    
-    // It should render the SpaceFeedPage (Home)
-    expect(screen.getByText(/Space Feed \(Home\)/i)).toBeInTheDocument();
+    // It should render the Login heading because ProtectedRoute redirects to /login
+    expect(screen.getByRole('heading', { name: /Welcome Back/i })).toBeInTheDocument();
   });
 });

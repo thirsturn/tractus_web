@@ -1,14 +1,57 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import tractusLogo from '../assets/Tractus.svg';
 import sideImage from '../assets/a-group-of-young-people-sitting-around-a-rounded-t.svg';
 import './LoginPage.css';
+import authService from '../services/auth.service';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [username, setUsername] = useState(''); // Used for login username AND register username
+  const [email, setEmail] = useState(''); // Used only for register
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted");
+    setError('');
+
+    if (!isLogin && password !== confirmPassword) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (isLogin) {
+        // Login Flow
+        const response = await authService.login({ username, password });
+        login(response.token, response.user);
+        navigate('/'); // Redirect to Dashboard
+      } else {
+        // Register Flow
+        await authService.register({ username, email, passwordHash: password });
+        // Automatically login after successful registration
+        const response = await authService.login({ username, password });
+        login(response.token, response.user);
+        navigate('/'); // Redirect to Dashboard
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Authentication failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+    setError(''); // Clear errors when switching modes
   };
 
   return (
@@ -28,20 +71,49 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="auth-form">
+            {error && <div style={{ color: '#fa477a', fontSize: '0.9rem', fontWeight: 600 }}>{error}</div>}
+            
+            <div className="input-group">
+              <input 
+                type="text" 
+                placeholder="Username" 
+                value={username} 
+                onChange={(e) => setUsername(e.target.value)} 
+                required 
+              />
+            </div>
+            
             {!isLogin && (
               <div className="input-group">
-                <input type="text" placeholder="Username" required />
+                <input 
+                  type="email" 
+                  placeholder="Email Address" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  required 
+                />
               </div>
             )}
+            
             <div className="input-group">
-              <input type={isLogin ? "text" : "email"} placeholder={isLogin ? "johndoe@gmail.com" : "Email Address"} required />
+              <input 
+                type="password" 
+                placeholder="Password (••••••••••••)" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                required 
+              />
             </div>
-            <div className="input-group">
-              <input type="password" placeholder="••••••••••••" required />
-            </div>
+            
             {!isLogin && (
               <div className="input-group">
-                <input type="password" placeholder="Confirm Password (••••••••••••)" required />
+                <input 
+                  type="password" 
+                  placeholder="Confirm Password (••••••••••••)" 
+                  value={confirmPassword} 
+                  onChange={(e) => setConfirmPassword(e.target.value)} 
+                  required 
+                />
               </div>
             )}
 
@@ -55,14 +127,14 @@ export default function LoginPage() {
               </div>
             )}
 
-            <button type="submit" className="submit-btn">
-              {isLogin ? 'Sign In' : 'Sign Up'}
+            <button type="submit" className="submit-btn" disabled={isLoading}>
+              {isLoading ? 'Processing...' : (isLogin ? 'Sign In' : 'Sign Up')}
             </button>
           </form>
 
           <p className="toggle-text">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
-            <button type="button" className="toggle-btn" onClick={() => setIsLogin(!isLogin)}>
+            <button type="button" className="toggle-btn" onClick={toggleMode}>
               {isLogin ? 'Sign Up' : 'Log In'}
             </button>
           </p>
