@@ -73,3 +73,15 @@ export default defineConfig([
 ])
 
 ```
+
+tractus_web/
+├── src/
+│   ├── assets/        # Images, SVG icons
+│   ├── components/    # Reusable dumb UI components (Buttons, Cards, Inputs)
+│   ├── context/       # AuthContext for global state
+│   ├── layouts/       # MainDashboardLayout (Sidebar + Navbar + Main Content area)
+│   ├── pages/         # Smart components (LoginPage, SpaceFeedPage, ThreadDetailsPage)
+│   ├── services/      # Axios API calls
+│   ├── types/         # TypeScript interfaces mapping to your backend DTOs
+│   ├── App.tsx        # React Router configuration
+│   └── index.css      # Global Design System (Color variables, glassmorphism utilities)
