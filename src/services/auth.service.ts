@@ -1,5 +1,5 @@
 import api from './api';
-import { AuthResponse } from '../types/auth.types';
+import type { AuthResponse } from '../types/auth.types';
 
 // The data structure required by the backend to register a user
 export interface RegisterData {
