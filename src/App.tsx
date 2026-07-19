@@ -3,6 +3,8 @@ import './App.css'
 import LoginPage from './pages/LoginPage'
 import DashboardLayout from './layouts/DashboardLayout'
 import SpaceFeedPage from './pages/SpaceFeedPage'
+import ThreadDetailsPage from './pages/ThreadDetailsPage'
+import UserProfilePage from './pages/UserProfilePage'
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
         <Route path="/" element={<DashboardLayout />}>
           <Route index element={<SpaceFeedPage />} />
           <Route path="space/:id" element={<SpaceFeedPage />} />
+          <Route path="thread/:id" element={<ThreadDetailsPage />} />
+          <Route path="profile/:username" element={<UserProfilePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
