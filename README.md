@@ -1,70 +1,75 @@
-# Tractus - A Topic-Based Community Platform
+# React + TypeScript + Vite
 
-> **Status:** Academic-Safe Development Mode
-> **Rule:** Done is better than perfect. Focus on Micro-Tasks.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
----
+Currently, two official plugins are available:
 
-## 📌 PROJECT MEMORY / NEXT ACTIONS
-<!-- Academic වැඩ ඉවර වෙලා ආපහු එද්දී කරන්න ඕන පොඩිම දේ මෙතන Update කරන්න -->
-- [ ] CURRENT FOCUS: Initialize the projects and database schema.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
----
+## React Compiler
 
-## 🗺️ MVP ROADMAP
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-### 📁 Phase 1: Database & Backend Architecture (Spring Boot)
-- [x] Initialize Spring Boot Web API Project
-- [x] Setup JPA/Hibernate with PostgreSQL
-- [x] Design Core Schema: Users, Spaces (Topics), Threads, Replies
-- [x] Implement JWT Authentication Endpoints (Register / Login)
+## Expanding the ESLint configuration
 
-### 💻 Phase 2: Frontend Core UI (React / Vite)
-- [ ] Setup Frontend Project Structure & State Management
-- [ ] Design Minimalist Light/Dark Theme Layout
-- [ ] Create Login & Registration UI Forms
-- [ ] Build Main Dashboard Sidebar with Spaces/Topics list
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-### 🔄 Phase 3: Core Community Interactions (The Feed)
-- [ ] Create API Endpoints for Creating a Thread & Fetching Feed by Topic
-- [ ] Integrate Frontend View with the Thread Feed
-- [ ] Add Simple Reply / Comment System under Threads
-- [ ] Implement Upvote/Like Toggle Functionality
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
----
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-## 🏗️ Frontend Architecture (Phase 2)
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 
-**Tech Stack:** React (Vite), TypeScript, React Router, Axios, Vanilla CSS.
-
-### 1. The Service Layer (API Integration)
-The frontend should not know *how* to talk to the backend inside the UI components. We will abstract all API calls into a dedicated `services/` folder.
-* **`api.ts`**: An Axios instance that automatically intercepts requests and injects your JWT token. If a token expires, it can handle logging the user out.
-* **`auth.service.ts`**: Handles `/api/auth/login` and `/api/auth/register`.
-* **`space.service.ts`**: Handles fetching the topics.
-
-### 2. State Management (Context API)
-Instead of passing data down through 10 layers of components (prop-drilling), we will use React's native **Context API**.
-* **`AuthContext.tsx`**: Will wrap the entire app. It holds the `currentUser` object and the JWT token. If `currentUser` is null, the app knows to redirect the user to the Login page.
-
-### 3. Folder Structure
-```text
-tractus_web/
-├── src/
-│   ├── assets/        # Images, SVG icons
-│   ├── components/    # Reusable dumb UI components (Buttons, Cards, Inputs)
-│   ├── context/       # AuthContext for global state
-│   ├── layouts/       # MainDashboardLayout (Sidebar + Navbar + Main Content area)
-│   ├── pages/         # Smart components (LoginPage, SpaceFeedPage, ThreadDetailsPage)
-│   ├── services/      # Axios API calls
-│   ├── types/         # TypeScript interfaces mapping to your backend DTOs
-│   ├── App.tsx        # React Router configuration
-│   └── index.css      # Global Design System (Color variables, glassmorphism utilities)
 ```
 
-### 4. Component Hierarchy (Data Flow)
-1. **`App.tsx`** sets up the routes.
-2. The user goes to `/login`, hits **`LoginPage`**.
-3. User logs in, `AuthContext` saves the JWT in `localStorage` and updates global state.
-4. User is redirected to `/` (Root), which loads **`MainDashboardLayout`**.
-5. The Layout loads the Sidebar (fetches Spaces) and the main feed area.
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+
+```
