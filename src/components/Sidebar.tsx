@@ -13,15 +13,15 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-nav">
         <h3 className="nav-heading">Menu</h3>
-        <NavLink to="/" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
+        <NavLink to="/" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
           <Home size={20} />
           <span>Home Feed</span>
         </NavLink>
-        <NavLink to="/explore" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
+        <NavLink to="/explore" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
           <Compass size={20} />
           <span>Explore</span>
         </NavLink>
-        <NavLink to="/messages" className={({isActive}) => isActive ? "nav-item active" : "nav-item"}>
+        <NavLink to="/messages" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
           <MessageSquare size={20} />
           <span>Messages</span>
         </NavLink>
@@ -30,17 +30,17 @@ export default function Sidebar() {
       <div className="sidebar-spaces">
         <h3 className="nav-heading">Spaces</h3>
         {spaces.map(space => (
-          <NavLink 
-            key={space.id} 
-            to={`/space/${space.id}`} 
-            className={({isActive}) => isActive ? "nav-item active" : "nav-item"}
+          <NavLink
+            key={space.id}
+            to={`/space/${space.id}`}
+            className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
           >
             {space.icon}
             <span>{space.name}</span>
           </NavLink>
         ))}
       </div>
-      
+
       <div className="sidebar-footer">
         <button className="nav-item">
           <Settings size={20} />
