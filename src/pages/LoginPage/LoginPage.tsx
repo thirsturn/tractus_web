@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import tractusLogo from '../assets/Tractus.svg';
-import sideImage from '../assets/a-group-of-young-people-sitting-around-a-rounded-t.svg';
+import tractusLogo from '../../assets/Tractus.svg';
+import sideImage from '../../assets/a-group-of-young-people-sitting-around-a-rounded-t.svg';
 import './LoginPage.css';
-import authService from '../services/auth.service';
-import { useAuth } from '../context/AuthContext';
+import authService from '../../services/auth.service';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);

@@ -4,14 +4,14 @@ import App from './App';
 import { AuthProvider } from './context/AuthContext';
 
 describe('App Routing', () => {
-  it('redirects to login by default on root path since unauthenticated', () => {
+  it('renders the Dashboard by default since ProtectedRoute is temporarily bypassed', () => {
     render(
       <AuthProvider>
         <App />
       </AuthProvider>
     );
     
-    // It should render the Login heading because ProtectedRoute redirects to /login
-    expect(screen.getByRole('heading', { name: /Welcome Back/i })).toBeInTheDocument();
+    // It should render the Dashboard Sidebar (Menu)
+    expect(screen.getByText('Menu')).toBeInTheDocument();
   });
 });

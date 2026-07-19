@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import LoginPage from './LoginPage';
-import { AuthProvider } from '../context/AuthContext';
+import { AuthProvider } from '../../context/AuthContext';
 import { MemoryRouter } from 'react-router-dom';
 
 describe('LoginPage Component', () => {
