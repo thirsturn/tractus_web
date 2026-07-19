@@ -1,0 +1,127 @@
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(135deg, #180344 0%, #2a067a 100%);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.login-card {
+  background-color: #f0e9ef;
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #1a1a1a;
+}
+
+.logo {
+  width: 90px;
+  height: auto;
+  margin-bottom: 1.5rem;
+}
+
+.login-card h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  color: #2a067a;
+  letter-spacing: -0.025em;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+  text-align: left;
+}
+
+.input-group input {
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  outline: none;
+  color: #333;
+}
+
+.input-group input:focus {
+  border-color: #fa477a;
+  box-shadow: 0 0 0 4px rgba(250, 71, 122, 0.15);
+}
+
+.primary-btn {
+  background-color: #fa477a;
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(250, 71, 122, 0.3);
+}
+
+.primary-btn:hover {
+  background-color: #e03f6d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(250, 71, 122, 0.4);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+}
+
+.toggle-mode {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.text-btn {
+  background: none;
+  border: none;
+  color: #7fbd78;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.25rem;
+  transition: color 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.text-btn:hover {
+  color: #619a5a;
+  text-decoration: underline;
+}
