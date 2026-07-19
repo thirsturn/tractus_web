@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import threadService from '../services/thread.service';
-import type { ThreadResponse } from '../types/thread.types';
-import ThreadCard from '../components/ThreadCard';
+import threadService from '../../services/thread.service';
+import type { ThreadResponse } from '../../types/thread.types';
+import ThreadCard from '../../components/ThreadCard';
 import { Plus } from 'lucide-react';
 import './SpaceFeedPage.css';
 
