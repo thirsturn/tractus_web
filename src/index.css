@@ -1,14 +1,36 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+  /* Brand Colors */
+  --color-primary: #2a067a; /* Deep Purple */
+  --color-secondary: #fa477a; /* Vibrant Pink */
+  --color-background: #f0e9ef; /* Light Pinkish White */
+  --color-accent: #7fbd78; /* Soft Green */
+  
+  /* UI Colors */
+  --color-text-main: #1a1a1a;
+  --color-text-muted: #666666;
+  --color-surface: #ffffff;
+  --color-border: #e2dce1;
+  --color-hover: #f8f4f7;
+  
+  /* Layout Dimensions */
+  --sidebar-width: 260px;
+  --topnav-height: 70px;
 }
 
 body {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #1a1a1a;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  overflow: hidden; /* We will manage scrolling in the content area */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
 }
