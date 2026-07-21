@@ -23,10 +23,10 @@ export default function Sidebar() {
       </div>
 
       <div className="sidebar-footer">
-        <button className="nav-item">
+        <NavLink to="/settings" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
           <Settings size={20} />
           <span>Settings</span>
-        </button>
+        </NavLink>
       </div>
     </aside>
   );

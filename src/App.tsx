@@ -6,6 +6,7 @@ import DashboardLayout from './layouts/DashboardLayout'
 import SpaceFeedPage from './pages/SpaceFeedPage/SpaceFeedPage'
 import ThreadDetailsPage from './pages/ThreadDetailsPage/ThreadDetailsPage'
 import UserProfilePage from './pages/UserProfilePage/UserProfilePage'
+import SettingsPage from './pages/SettingsPage/SettingsPage'
 function ProtectedRoute({ children }: { children: ReactNode }) {
   // Temporarily bypassed for UI testing
   return children;
@@ -28,6 +29,7 @@ function App() {
           <Route path="space/:id" element={<SpaceFeedPage />} />
           <Route path="thread/:id" element={<ThreadDetailsPage />} />
           <Route path="profile/:username" element={<UserProfilePage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
