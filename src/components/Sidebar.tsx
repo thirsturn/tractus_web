@@ -28,7 +28,7 @@ export default function Sidebar() {
       </div>
 
       <div className="sidebar-spaces">
-        <h3 className="nav-heading">Spaces</h3>
+        <h3 className="nav-heading">Trending Spaces</h3>
         {spaces.map(space => (
           <NavLink
             key={space.id}
