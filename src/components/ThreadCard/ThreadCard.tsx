@@ -1,5 +1,5 @@
 import { MessageSquare, ArrowUp, ArrowDown } from 'lucide-react';
-import type { ThreadResponse } from '../types/thread.types';
+import type { ThreadResponse } from '../../types/thread.types';
 import './ThreadCard.css';
 
 interface ThreadCardProps {

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import threadService from '../../services/thread.service';
 import type { ThreadResponse } from '../../types/thread.types';
-import ThreadCard from '../../components/ThreadCard';
-import CreateThreadModal from '../../components/CreateThreadModal';
+import ThreadCard from '../../components/ThreadCard/ThreadCard';
+import CreateThreadModal from '../../components/CreateThreadModal/CreateThreadModal';
 import { Plus } from 'lucide-react';
 import './SpaceFeedPage.css';
 
@@ -39,11 +39,7 @@ export default function SpaceFeedPage() {
     <div className="space-feed-container">
       <div className="feed-header">
         <div>
-          <h1 className="feed-title">
-            {activeSpaceId === 1 ? 'General' : 
-             activeSpaceId === 2 ? 'Technology' : 
-             activeSpaceId === 3 ? 'Announcements' : 'Space Feed'}
-          </h1>
+          <h1 className="feed-title">Home Feed</h1>
           <p className="feed-subtitle">Join the discussion</p>
         </div>
         

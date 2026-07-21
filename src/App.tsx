@@ -1,21 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import type { ReactNode } from 'react'
 import './App.css'
 import LoginPage from './pages/LoginPage/LoginPage'
 import DashboardLayout from './layouts/DashboardLayout'
 import SpaceFeedPage from './pages/SpaceFeedPage/SpaceFeedPage'
 import ThreadDetailsPage from './pages/ThreadDetailsPage/ThreadDetailsPage'
 import UserProfilePage from './pages/UserProfilePage/UserProfilePage'
-import { useAuth } from './context/AuthContext'
-import type { ReactNode } from 'react'
-
 function ProtectedRoute({ children }: { children: ReactNode }) {
-  // const { isAuthenticated } = useAuth();
-  
   // Temporarily bypassed for UI testing
-  // if (!isAuthenticated) {
-  //   return <Navigate to="/login" replace />;
-  // }
-  
   return children;
 }
 

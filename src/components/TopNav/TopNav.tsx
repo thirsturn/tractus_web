@@ -1,6 +1,6 @@
 import { Search, Bell, User, LogOut } from 'lucide-react';
-import tractusLogo from '../assets/Tractus.svg';
-import { useAuth } from '../context/AuthContext';
+import tractusLogo from '../../assets/Tractus.svg';
+import { useAuth } from '../../context/AuthContext';
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './TopNav.css';

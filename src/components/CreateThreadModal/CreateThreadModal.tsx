@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Image as ImageIcon } from 'lucide-react';
 import './CreateThreadModal.css';
-import threadService from '../services/thread.service';
+import threadService from '../../services/thread.service';
 
 interface CreateThreadModalProps {
   isOpen: boolean;
@@ -13,9 +13,31 @@ interface CreateThreadModalProps {
 export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultSpaceId = 1 }: CreateThreadModalProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [spaceId, setSpaceId] = useState(defaultSpaceId);
+  const [spaceId] = useState(defaultSpaceId);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // NOTE: We don't save the actual file into state yet since the API doesn't support it,
+      // we just create the preview URL for the UI!
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+    }
+  };
+
+  const removeImage = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -30,6 +52,8 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
     setError(null);
     
     try {
+      // NOTE: We are currently only sending JSON to the backend. 
+      // The imageFile is ignored in this API call until the backend is updated to support MultipartFormData!
       await threadService.createThread({ 
         title, 
         spaceId,
@@ -39,6 +63,7 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
       // Reset form
       setTitle('');
       setContent('');
+      removeImage();
       
       // Close modal and refresh feed
       onSuccess();
@@ -63,19 +88,6 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
         {error && <div className="modal-error">{error}</div>}
         
         <form onSubmit={handleSubmit} className="create-post-form">
-          <div className="form-group">
-            <label htmlFor="space">Select Space</label>
-            <select 
-              id="space" 
-              value={spaceId} 
-              onChange={(e) => setSpaceId(Number(e.target.value))}
-              className="form-input"
-            >
-              <option value={1}>General</option>
-              <option value={2}>Technology</option>
-              <option value={3}>Announcements</option>
-            </select>
-          </div>
           
           <div className="form-group">
             <label htmlFor="title">Title *</label>
@@ -98,9 +110,45 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="form-input textarea"
-              rows={5}
+              rows={4}
               disabled={isSubmitting}
             />
+          </div>
+          
+          <div className="image-upload-section">
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={fileInputRef} 
+              onChange={handleImageChange} 
+              style={{ display: 'none' }} 
+              disabled={isSubmitting}
+            />
+            
+            {!imagePreview ? (
+              <button 
+                type="button" 
+                className="btn-add-image" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isSubmitting}
+              >
+                <ImageIcon size={18} />
+                Attach an Image
+              </button>
+            ) : (
+              <div className="image-preview-wrapper">
+                <img src={imagePreview} alt="Preview" className="image-preview" />
+                <button 
+                  type="button" 
+                  className="btn-remove-image" 
+                  onClick={removeImage}
+                  disabled={isSubmitting}
+                  title="Remove image"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
           </div>
           
           <div className="modal-footer">
