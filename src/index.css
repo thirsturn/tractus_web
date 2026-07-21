@@ -17,6 +17,17 @@
   --topnav-height: 70px;
 }
 
+body.dark-theme {
+  --color-primary: #8a5aff; /* Lighter Purple for dark mode */
+  --color-secondary: #ff759c; /* Bright Pink */
+  --color-background: #121212;
+  --color-surface: #1e1e1e;
+  --color-text-main: #e0e0e0;
+  --color-text-muted: #a0a0a0;
+  --color-border: #333333;
+  --color-hover: #2c2c2c;
+}
+
 body {
   margin: 0;
   padding: 0;
