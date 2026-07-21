@@ -1,13 +1,8 @@
 import { NavLink } from 'react-router-dom';
-import { Home, MessageSquare, Compass, Hash, Settings } from 'lucide-react';
+import { Home, MessageSquare, Compass, Settings } from 'lucide-react';
 import './Sidebar.css';
 
 export default function Sidebar() {
-  const spaces = [
-    { id: 1, name: 'General', icon: <Hash size={18} /> },
-    { id: 2, name: 'Technology', icon: <Hash size={18} /> },
-    { id: 3, name: 'Announcements', icon: <Hash size={18} /> },
-  ];
 
   return (
     <aside className="sidebar">
@@ -25,20 +20,6 @@ export default function Sidebar() {
           <MessageSquare size={20} />
           <span>Messages</span>
         </NavLink>
-      </div>
-
-      <div className="sidebar-spaces">
-        <h3 className="nav-heading">Trending Spaces</h3>
-        {spaces.map(space => (
-          <NavLink
-            key={space.id}
-            to={`/space/${space.id}`}
-            className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}
-          >
-            {space.icon}
-            <span>{space.name}</span>
-          </NavLink>
-        ))}
       </div>
 
       <div className="sidebar-footer">
