@@ -7,6 +7,13 @@ import CreateThreadModal from '../../components/CreateThreadModal/CreateThreadMo
 import { Plus } from 'lucide-react';
 import './SpaceFeedPage.css';
 
+const MOCK_HOME_THREADS: ThreadResponse[] = [
+  { id: 201, title: 'Welcome to Tractus! Introduce yourself here 👋', spaceId: 1, author: { id: 10, username: 'CommunityManager', email: 'cm@test.com' } },
+  { id: 202, title: 'What are you working on this weekend?', spaceId: 1, author: { id: 11, username: 'WeekendWarrior', email: 'ww@test.com' } },
+  { id: 203, title: 'Tips for transitioning from frontend to full-stack?', spaceId: 1, author: { id: 12, username: 'ReactDev123', email: 'react@test.com' } },
+  { id: 204, title: 'Has anyone tried the new Vite build tools?', spaceId: 1, author: { id: 13, username: 'SpeedCoder', email: 'speed@test.com' } }
+];
+
 export default function SpaceFeedPage() {
   const { id } = useParams<{ id: string }>();
   // Default to Space 1 (General) if no space is provided in the URL (e.g. Home page)
@@ -22,10 +29,16 @@ export default function SpaceFeedPage() {
     setError(null);
     try {
       const data = await threadService.getThreadsBySpace(activeSpaceId);
-      setThreads(data);
+      // If the backend is running but empty, show mock data anyway for UI purposes
+      if (data && data.length > 0) {
+        setThreads(data);
+      } else {
+        setThreads(MOCK_HOME_THREADS);
+      }
     } catch (err: any) {
-      setError("Failed to load threads for this space.");
-      console.error(err);
+      // Fallback to mock data if the backend is down
+      console.log("Backend not available, falling back to mock data for Home Feed.");
+      setThreads(MOCK_HOME_THREADS);
     } finally {
       setIsLoading(false);
     }

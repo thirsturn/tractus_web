@@ -1,4 +1,5 @@
 import { MessageSquare, ArrowUp, ArrowDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { ThreadResponse } from '../../types/thread.types';
 import './ThreadCard.css';
 
@@ -26,7 +27,7 @@ export default function ThreadCard({ thread }: ThreadCardProps) {
       </div>
 
       {/* Main Content Area */}
-      <div className="thread-content">
+      <Link to={`/thread/${thread.id}`} className="thread-content">
         <div className="thread-header">
           <div className="thread-author-avatar">
             {thread.author.username.charAt(0).toUpperCase()}
@@ -38,12 +39,12 @@ export default function ThreadCard({ thread }: ThreadCardProps) {
         <h2 className="thread-title">{thread.title}</h2>
         
         <div className="thread-actions">
-          <button className="action-btn">
+          <button className="action-btn" onClick={(e) => e.preventDefault()}>
             <MessageSquare size={16} />
             <span>{commentsCount} Comments</span>
           </button>
         </div>
-      </div>
+      </Link>
     </article>
   );
 }
