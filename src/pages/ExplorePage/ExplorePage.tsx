@@ -5,13 +5,13 @@ import type { ThreadResponse } from '../../types/thread.types';
 import './ExplorePage.css';
 
 // Mock Data
-const MOCK_TOP_THREADS: ThreadResponse[] = [
+const MOCK_TRENDING_THREADS: ThreadResponse[] = [
   { id: 101, title: 'What is the most underrated programming language in 2026?', spaceId: 2, author: { id: 1, username: 'TechGuru', email: 'tech@test.com' } },
   { id: 102, title: 'Tractus v2.0 Release Notes and Discussion', spaceId: 3, author: { id: 2, username: 'Admin', email: 'admin@test.com' } },
   { id: 103, title: 'How do you handle burnout as a developer?', spaceId: 1, author: { id: 3, username: 'CodeNinja', email: 'ninja@test.com' } },
 ];
 
-const MOCK_RISING_THREADS: ThreadResponse[] = [
+const MOCK_RELATED_THREADS: ThreadResponse[] = [
   { id: 104, title: 'Just discovered an amazing new CSS framework!', spaceId: 2, author: { id: 4, username: 'DesignPro', email: 'design@test.com' } },
   { id: 105, title: 'Upcoming community meetup in New York', spaceId: 1, author: { id: 5, username: 'EventPlanner', email: 'events@test.com' } },
 ];
@@ -20,10 +20,10 @@ const MOCK_RISING_THREADS: ThreadResponse[] = [
 const POPULAR_TAGS = ['#technology', '#announcements', '#general', '#react', '#springboot', '@admin'];
 
 export default function ExplorePage() {
-  const [activeTab, setActiveTab] = useState<'top' | 'rising'>('top');
+  const [activeTab, setActiveTab] = useState<'trending' | 'related'>('trending');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const displayThreads = activeTab === 'top' ? MOCK_TOP_THREADS : MOCK_RISING_THREADS;
+  const displayThreads = activeTab === 'trending' ? MOCK_TRENDING_THREADS : MOCK_RELATED_THREADS;
 
   return (
     <div className="explore-container">
@@ -64,16 +64,16 @@ export default function ExplorePage() {
         <section className="trending-section">
           <div className="trending-tabs">
             <button 
-              className={`trending-tab ${activeTab === 'top' ? 'active' : ''}`}
-              onClick={() => setActiveTab('top')}
+              className={`trending-tab ${activeTab === 'trending' ? 'active' : ''}`}
+              onClick={() => setActiveTab('trending')}
             >
-              <Flame size={18} /> Top of the Week
+              <Flame size={18} /> Trending Topics
             </button>
             <button 
-              className={`trending-tab ${activeTab === 'rising' ? 'active' : ''}`}
-              onClick={() => setActiveTab('rising')}
+              className={`trending-tab ${activeTab === 'related' ? 'active' : ''}`}
+              onClick={() => setActiveTab('related')}
             >
-              <TrendingUp size={18} /> Rising
+              <TrendingUp size={18} /> Related to You
             </button>
           </div>
           
