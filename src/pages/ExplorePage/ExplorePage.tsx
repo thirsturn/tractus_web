@@ -1,0 +1,122 @@
+import { useState } from 'react';
+import { Search, Trophy, TrendingUp, Flame, Hash, User as UserIcon } from 'lucide-react';
+import ThreadCard from '../../components/ThreadCard/ThreadCard';
+import type { ThreadResponse } from '../../types/thread.types';
+import './ExplorePage.css';
+
+// Mock Data
+const MOCK_TOP_THREADS: ThreadResponse[] = [
+  { id: 101, title: 'What is the most underrated programming language in 2026?', spaceId: 2, author: { id: 1, username: 'TechGuru', email: 'tech@test.com' } },
+  { id: 102, title: 'Tractus v2.0 Release Notes and Discussion', spaceId: 3, author: { id: 2, username: 'Admin', email: 'admin@test.com' } },
+  { id: 103, title: 'How do you handle burnout as a developer?', spaceId: 1, author: { id: 3, username: 'CodeNinja', email: 'ninja@test.com' } },
+];
+
+const MOCK_RISING_THREADS: ThreadResponse[] = [
+  { id: 104, title: 'Just discovered an amazing new CSS framework!', spaceId: 2, author: { id: 4, username: 'DesignPro', email: 'design@test.com' } },
+  { id: 105, title: 'Upcoming community meetup in New York', spaceId: 1, author: { id: 5, username: 'EventPlanner', email: 'events@test.com' } },
+];
+
+const MOCK_LEADERS = [
+  { id: 1, username: 'TechGuru', score: 1450, rank: 1 },
+  { id: 2, username: 'CodeNinja', score: 980, rank: 2 },
+  { id: 3, username: 'DesignPro', score: 875, rank: 3 },
+  { id: 4, username: 'DevEnthusiast', score: 620, rank: 4 },
+  { id: 5, username: 'DataWizard', score: 450, rank: 5 },
+];
+
+const POPULAR_TAGS = ['#technology', '#announcements', '#general', '#react', '#springboot', '@admin'];
+
+export default function ExplorePage() {
+  const [activeTab, setActiveTab] = useState<'top' | 'rising'>('top');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const displayThreads = activeTab === 'top' ? MOCK_TOP_THREADS : MOCK_RISING_THREADS;
+
+  return (
+    <div className="explore-container">
+      <div className="explore-main">
+        {/* Advanced Search Hub */}
+        <section className="search-hub">
+          <div className="search-hub-header">
+            <h1>Explore Tractus</h1>
+            <p>Search for discussions, users, and trending topics.</p>
+          </div>
+          
+          <div className="search-hub-input-container">
+            <Search className="search-hub-icon" size={20} />
+            <input 
+              type="text" 
+              className="search-hub-input" 
+              placeholder="Search by topic, user, or keyword..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="search-hub-tags">
+            {POPULAR_TAGS.map(tag => (
+              <button 
+                key={tag} 
+                className={`tag-pill ${tag.startsWith('@') ? 'user-tag' : ''}`}
+                onClick={() => setSearchQuery(tag)}
+              >
+                {tag.startsWith('@') ? <UserIcon size={14} /> : <Hash size={14} />}
+                {tag.replace(/[@#]/, '')}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Trending Threads */}
+        <section className="trending-section">
+          <div className="trending-tabs">
+            <button 
+              className={`trending-tab ${activeTab === 'top' ? 'active' : ''}`}
+              onClick={() => setActiveTab('top')}
+            >
+              <Flame size={18} /> Top of the Week
+            </button>
+            <button 
+              className={`trending-tab ${activeTab === 'rising' ? 'active' : ''}`}
+              onClick={() => setActiveTab('rising')}
+            >
+              <TrendingUp size={18} /> Rising
+            </button>
+          </div>
+          
+          <div className="trending-feed">
+            {displayThreads.map(thread => (
+              <ThreadCard key={thread.id} thread={thread} />
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <aside className="explore-sidebar">
+        {/* Top Contributors Leaderboard */}
+        <div className="leaderboard-widget">
+          <div className="leaderboard-header">
+            <Trophy size={20} className="text-secondary" />
+            <h2>Top Contributors</h2>
+          </div>
+          <p className="leaderboard-subtitle">Most active members this week</p>
+          
+          <div className="leaderboard-list">
+            {MOCK_LEADERS.map(leader => (
+              <div key={leader.id} className="leaderboard-item">
+                <div className="leader-rank">#{leader.rank}</div>
+                <div className="leader-avatar">
+                  {leader.username.charAt(0).toUpperCase()}
+                </div>
+                <div className="leader-info">
+                  <span className="leader-name">{leader.username}</span>
+                  <span className="leader-score">{leader.score.toLocaleString()} pts</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
+    </div>
+  );
+}
