@@ -1,4 +1,4 @@
-import { Search, Bell, User, LogOut, Heart, MessageSquare, AtSign, Check } from 'lucide-react';
+import { Bell, User, LogOut, Heart, MessageSquare, AtSign, Check } from 'lucide-react';
 import tractusLogo from '../../assets/Tractus.svg';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useRef, useEffect } from 'react';
@@ -49,10 +49,7 @@ export default function TopNav() {
       </div>
       
       <div className="topnav-search">
-        <div className="search-input-wrapper">
-          <Search size={18} className="search-icon" />
-          <input type="text" placeholder="Search discussions..." className="search-input" />
-        </div>
+        {/* Search removed per user request */}
       </div>
       
       <div className="topnav-actions">
