@@ -15,9 +15,9 @@ export default function TopNav() {
 
   // Mock Notifications Data
   const [notifications, setNotifications] = useState([
-    { id: 1, type: 'upvote', user: 'Alex', action: 'upvoted your post', time: '5m ago', read: false },
-    { id: 2, type: 'comment', user: 'Sarah', action: 'commented on your thread', time: '1h ago', read: false },
-    { id: 3, type: 'mention', user: 'DevTeam', action: 'mentioned you in an announcement', time: '2h ago', read: true }
+    { id: 1, type: 'upvote', user: 'Alex', action: 'upvoted your post', time: '5m ago', read: false, threadId: 1 },
+    { id: 2, type: 'comment', user: 'Sarah', action: 'commented on your thread', time: '1h ago', read: false, threadId: 101 },
+    { id: 3, type: 'mention', user: 'DevTeam', action: 'mentioned you in an announcement', time: '2h ago', read: true, threadId: 102 }
   ]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -81,7 +81,13 @@ export default function TopNav() {
                   <div className="no-notifications">You're all caught up!</div>
                 ) : (
                   notifications.map(notif => (
-                    <div key={notif.id} className={`notification-item ${!notif.read ? 'unread' : ''}`}>
+                    <Link 
+                      key={notif.id} 
+                      to={`/thread/${notif.threadId}`}
+                      onClick={() => setNotificationsOpen(false)}
+                      className={`notification-item ${!notif.read ? 'unread' : ''}`}
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
                       <div className="notification-icon">
                         {notif.type === 'upvote' && <Heart size={16} className="text-secondary" />}
                         {notif.type === 'comment' && <MessageSquare size={16} className="text-primary" />}
@@ -92,7 +98,7 @@ export default function TopNav() {
                         <span className="notification-time">{notif.time}</span>
                       </div>
                       {!notif.read && <div className="unread-dot"></div>}
-                    </div>
+                    </Link>
                   ))
                 )}
               </div>
