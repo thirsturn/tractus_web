@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Trophy, TrendingUp, Flame, Hash, User as UserIcon } from 'lucide-react';
+import { Search, TrendingUp, Flame, Hash, User as UserIcon } from 'lucide-react';
 import ThreadCard from '../../components/ThreadCard/ThreadCard';
 import type { ThreadResponse } from '../../types/thread.types';
 import './ExplorePage.css';
@@ -16,13 +16,6 @@ const MOCK_RISING_THREADS: ThreadResponse[] = [
   { id: 105, title: 'Upcoming community meetup in New York', spaceId: 1, author: { id: 5, username: 'EventPlanner', email: 'events@test.com' } },
 ];
 
-const MOCK_LEADERS = [
-  { id: 1, username: 'TechGuru', score: 1450, rank: 1 },
-  { id: 2, username: 'CodeNinja', score: 980, rank: 2 },
-  { id: 3, username: 'DesignPro', score: 875, rank: 3 },
-  { id: 4, username: 'DevEnthusiast', score: 620, rank: 4 },
-  { id: 5, username: 'DataWizard', score: 450, rank: 5 },
-];
 
 const POPULAR_TAGS = ['#technology', '#announcements', '#general', '#react', '#springboot', '@admin'];
 
@@ -91,32 +84,6 @@ export default function ExplorePage() {
           </div>
         </section>
       </div>
-
-      <aside className="explore-sidebar">
-        {/* Top Contributors Leaderboard */}
-        <div className="leaderboard-widget">
-          <div className="leaderboard-header">
-            <Trophy size={20} className="text-secondary" />
-            <h2>Top Contributors</h2>
-          </div>
-          <p className="leaderboard-subtitle">Most active members this week</p>
-          
-          <div className="leaderboard-list">
-            {MOCK_LEADERS.map(leader => (
-              <div key={leader.id} className="leaderboard-item">
-                <div className="leader-rank">#{leader.rank}</div>
-                <div className="leader-avatar">
-                  {leader.username.charAt(0).toUpperCase()}
-                </div>
-                <div className="leader-info">
-                  <span className="leader-name">{leader.username}</span>
-                  <span className="leader-score">{leader.score.toLocaleString()} pts</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </aside>
     </div>
   );
 }
