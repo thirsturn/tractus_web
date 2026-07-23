@@ -192,6 +192,14 @@ export default function UserProfilePage() {
             <span className="stat-number">{userPosts.length}</span>
             <span className="stat-label">Posts</span>
           </div>
+          <div className="stat-block">
+            <span className="stat-number">142</span>
+            <span className="stat-label">Followers</span>
+          </div>
+          <div className="stat-block">
+            <span className="stat-number">89</span>
+            <span className="stat-label">Following</span>
+          </div>
         </div>
       </div>
 
