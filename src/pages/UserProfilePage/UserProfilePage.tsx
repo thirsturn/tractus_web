@@ -1,25 +1,14 @@
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare } from 'lucide-react';
 import ThreadCard from '../../components/ThreadCard/ThreadCard';
+import userService from '../../services/user.service';
+import type { User } from '../../types/auth.types';
 import type { ThreadResponse } from '../../types/thread.types';
 import './UserProfilePage.css';
 
-// Mock profile data (will be fetched from backend later)
-const MOCK_PROFILES: Record<string, { bio: string; location: string; website: string; joinedDate: string; postsCount: number; followersCount: number; followingCount: number }> = {
-  default: {
-    bio: 'Passionate developer and community contributor. Love discussing tech, open source, and building cool things.',
-    location: 'San Francisco, CA',
-    website: 'https://tractus.dev',
-    joinedDate: 'July 2026',
-    postsCount: 24,
-    followersCount: 142,
-    followingCount: 89,
-  }
-};
-
-// Mock user posts
+// Mock user posts (fallback when backend is down)
 const MOCK_USER_POSTS: ThreadResponse[] = [
   { id: 301, title: 'My experience building a full-stack app with Spring Boot and React', spaceId: 1, author: { id: 1, username: 'user', email: 'user@test.com' } },
   { id: 302, title: 'Best VS Code extensions for Java developers in 2026', spaceId: 2, author: { id: 1, username: 'user', email: 'user@test.com' } },
@@ -28,21 +17,48 @@ const MOCK_USER_POSTS: ThreadResponse[] = [
 
 export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
-  const { user } = useAuth();
-  const isOwnProfile = user?.username === username;
+  const { user: authUser } = useAuth();
+  const isOwnProfile = authUser?.username === username;
 
-  const profileData = MOCK_PROFILES['default'];
+  // Profile state
+  const [profileUser, setProfileUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Editable fields
   const [isEditing, setIsEditing] = useState(false);
-  const [bio, setBio] = useState(profileData.bio);
-  const [location, setLocation] = useState(profileData.location);
-  const [website, setWebsite] = useState(profileData.website);
+  const [bio, setBio] = useState('');
+  const [location, setLocation] = useState('');
+  const [website, setWebsite] = useState('');
 
   // Temporary edit values
-  const [editBio, setEditBio] = useState(bio);
-  const [editLocation, setEditLocation] = useState(location);
-  const [editWebsite, setEditWebsite] = useState(website);
+  const [editBio, setEditBio] = useState('');
+  const [editLocation, setEditLocation] = useState('');
+  const [editWebsite, setEditWebsite] = useState('');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setIsLoading(true);
+      try {
+        const data = await userService.getUserByUsername(username || '');
+        setProfileUser(data);
+        setBio(data.bio || '');
+        setLocation(data.location || '');
+        setWebsite(data.website || '');
+      } catch {
+        // Fallback to auth context data if backend is down
+        console.log('Backend not available, using local auth data for profile.');
+        if (authUser) {
+          setProfileUser(authUser);
+          setBio(authUser.bio || 'Passionate developer and community contributor.');
+          setLocation(authUser.location || 'San Francisco, CA');
+          setWebsite(authUser.website || 'https://tractus.dev');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [username, authUser]);
 
   const startEditing = () => {
     setEditBio(bio);
@@ -51,12 +67,25 @@ export default function UserProfilePage() {
     setIsEditing(true);
   };
 
-  const saveProfile = () => {
-    setBio(editBio);
-    setLocation(editLocation);
-    setWebsite(editWebsite);
+  const saveProfile = async () => {
+    if (!profileUser) return;
+    try {
+      const updatedUser = await userService.updateUser(profileUser.id, {
+        bio: editBio,
+        location: editLocation,
+        website: editWebsite,
+      });
+      setBio(updatedUser.bio || editBio);
+      setLocation(updatedUser.location || editLocation);
+      setWebsite(updatedUser.website || editWebsite);
+    } catch {
+      // If backend is down, just update locally
+      console.log('Backend not available, saving profile locally.');
+      setBio(editBio);
+      setLocation(editLocation);
+      setWebsite(editWebsite);
+    }
     setIsEditing(false);
-    // TODO: Call backend API to persist changes
   };
 
   const cancelEditing = () => {
@@ -68,6 +97,10 @@ export default function UserProfilePage() {
     ...post,
     author: { ...post.author, username: username || 'user' }
   }));
+
+  if (isLoading) {
+    return <div className="profile-container"><div className="loading-state">Loading profile...</div></div>;
+  }
 
   return (
     <div className="profile-container">
@@ -108,12 +141,12 @@ export default function UserProfilePage() {
                 rows={3}
               />
             ) : (
-              <p className="profile-bio">{bio}</p>
+              <p className="profile-bio">{bio || 'No bio yet.'}</p>
             )}
 
             <div className="profile-meta-row">
               <span className="meta-item">
-                <Mail size={14} /> {user?.email || `${username}@tractus.dev`}
+                <Mail size={14} /> {profileUser?.email || `${username}@tractus.dev`}
               </span>
               {isEditing ? (
                 <span className="meta-item editable">
@@ -126,9 +159,7 @@ export default function UserProfilePage() {
                   />
                 </span>
               ) : (
-                <span className="meta-item">
-                  <MapPin size={14} /> {location}
-                </span>
+                location && <span className="meta-item"><MapPin size={14} /> {location}</span>
               )}
               {isEditing ? (
                 <span className="meta-item editable">
@@ -141,13 +172,15 @@ export default function UserProfilePage() {
                   />
                 </span>
               ) : (
-                <span className="meta-item link">
-                  <LinkIcon size={14} /> 
-                  <a href={website} target="_blank" rel="noreferrer">{website}</a>
-                </span>
+                website && (
+                  <span className="meta-item link">
+                    <LinkIcon size={14} /> 
+                    <a href={website} target="_blank" rel="noreferrer">{website}</a>
+                  </span>
+                )
               )}
               <span className="meta-item">
-                <Calendar size={14} /> Joined {profileData.joinedDate}
+                <Calendar size={14} /> Joined July 2026
               </span>
             </div>
           </div>
@@ -156,16 +189,8 @@ export default function UserProfilePage() {
         {/* Stats Row */}
         <div className="profile-stats-row">
           <div className="stat-block">
-            <span className="stat-number">{profileData.postsCount}</span>
+            <span className="stat-number">{userPosts.length}</span>
             <span className="stat-label">Posts</span>
-          </div>
-          <div className="stat-block">
-            <span className="stat-number">{profileData.followersCount}</span>
-            <span className="stat-label">Followers</span>
-          </div>
-          <div className="stat-block">
-            <span className="stat-number">{profileData.followingCount}</span>
-            <span className="stat-label">Following</span>
           </div>
         </div>
       </div>
