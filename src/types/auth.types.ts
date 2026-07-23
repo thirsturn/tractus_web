@@ -5,6 +5,8 @@ export interface User {
   bio?: string;
   location?: string;
   website?: string;
+  followerCount?: number;
+  followingCount?: number;
 }
 
 export interface AuthResponse {
