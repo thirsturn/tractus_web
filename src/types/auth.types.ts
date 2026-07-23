@@ -7,6 +7,7 @@ export interface User {
   website?: string;
   followerCount?: number;
   followingCount?: number;
+  profileImageUrl?: string;
 }
 
 export interface AuthResponse {

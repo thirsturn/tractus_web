@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useState, useEffect } from 'react';
-import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare, Camera } from 'lucide-react';
 import ThreadCard from '../../components/ThreadCard/ThreadCard';
 import userService from '../../services/user.service';
 import type { User } from '../../types/auth.types';
@@ -23,6 +23,8 @@ export default function UserProfilePage() {
   // Profile state
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   // Editable fields
   const [isEditing, setIsEditing] = useState(false);
@@ -92,6 +94,22 @@ export default function UserProfilePage() {
     setIsEditing(false);
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profileUser) return;
+    
+    setIsUploadingAvatar(true);
+    try {
+      const updatedUser = await userService.uploadAvatar(profileUser.id, file);
+      setProfileUser(updatedUser);
+      // Optional: Refresh local auth state if it's the logged-in user
+    } catch (err) {
+      console.error("Failed to upload avatar", err);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   // Update mock posts to use the viewed username
   const userPosts = MOCK_USER_POSTS.map(post => ({
     ...post,
@@ -108,8 +126,30 @@ export default function UserProfilePage() {
       <div className="profile-header-card">
         <div className="profile-banner"></div>
         <div className="profile-header-content">
-          <div className="profile-avatar-large">
-            {(username || 'U').charAt(0).toUpperCase()}
+          <div className="profile-avatar-wrapper">
+            <div className="profile-avatar-large">
+              {profileUser?.profileImageUrl ? (
+                <img src={profileUser.profileImageUrl} alt={`${username}'s avatar`} className="avatar-image" />
+              ) : (
+                (username || 'U').charAt(0).toUpperCase()
+              )}
+            </div>
+            {isOwnProfile && isEditing && (
+              <button 
+                className="avatar-upload-btn" 
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+              >
+                <Camera size={18} />
+              </button>
+            )}
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleAvatarChange} 
+              accept="image/*"
+              style={{ display: 'none' }} 
+            />
           </div>
           
           <div className="profile-header-info">
