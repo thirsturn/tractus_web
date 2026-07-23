@@ -115,7 +115,11 @@ export default function TopNav() {
             }}
           >
             <div className="avatar">
-              {user?.username?.charAt(0).toUpperCase() || 'U'}
+              {user?.profileImageUrl ? (
+                <img src={user.profileImageUrl} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                user?.username?.charAt(0).toUpperCase() || 'U'
+              )}
             </div>
             <span className="username">{user?.username || 'Guest'}</span>
           </button>

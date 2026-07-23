@@ -16,6 +16,17 @@ const userService = {
   updateUser: async (id: number, data: UserUpdateData): Promise<User> => {
     const response = await api.put<User>(`/users/${id}`, data);
     return response.data;
+  },
+
+  uploadAvatar: async (id: number, file: File): Promise<User> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post<User>(`/users/${id}/avatar`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
   }
 };
 
