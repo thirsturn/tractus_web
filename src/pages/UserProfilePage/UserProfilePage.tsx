@@ -17,7 +17,7 @@ const MOCK_USER_POSTS: ThreadResponse[] = [
 
 export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
-  const { user: authUser } = useAuth();
+  const { user: authUser, updateAuthUser } = useAuth();
   const isOwnProfile = authUser?.username === username;
 
   // Profile state
@@ -80,12 +80,22 @@ export default function UserProfilePage() {
       setBio(updatedUser.bio || editBio);
       setLocation(updatedUser.location || editLocation);
       setWebsite(updatedUser.website || editWebsite);
+      setProfileUser(updatedUser);
+      if (isOwnProfile) {
+        updateAuthUser(updatedUser);
+      }
     } catch {
       // If backend is down, just update locally
       console.log('Backend not available, saving profile locally.');
       setBio(editBio);
       setLocation(editLocation);
       setWebsite(editWebsite);
+      
+      const updatedLocalUser = { ...profileUser, bio: editBio, location: editLocation, website: editWebsite };
+      setProfileUser(updatedLocalUser);
+      if (isOwnProfile) {
+        updateAuthUser(updatedLocalUser);
+      }
     }
     setIsEditing(false);
   };
@@ -102,7 +112,9 @@ export default function UserProfilePage() {
     try {
       const updatedUser = await userService.uploadAvatar(profileUser.id, file);
       setProfileUser(updatedUser);
-      // Optional: Refresh local auth state if it's the logged-in user
+      if (isOwnProfile) {
+        updateAuthUser(updatedUser);
+      }
     } catch (err) {
       console.error("Failed to upload avatar", err);
     } finally {
