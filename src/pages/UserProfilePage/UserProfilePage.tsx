@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
-import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare, Camera } from 'lucide-react';
+import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare, Camera, Lock } from 'lucide-react';
 import ThreadCard from '../../components/ThreadCard/ThreadCard';
 import userService from '../../services/user.service';
 import type { User } from '../../types/auth.types';
@@ -17,7 +17,7 @@ const MOCK_USER_POSTS: ThreadResponse[] = [
 
 export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
-  const { user: authUser } = useAuth();
+  const { user: authUser, updateAuthUser } = useAuth();
   const isOwnProfile = authUser?.username === username;
 
   // Profile state
@@ -25,6 +25,7 @@ export default function UserProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Editable fields
   const [isEditing, setIsEditing] = useState(false);
@@ -36,6 +37,8 @@ export default function UserProfilePage() {
   const [editBio, setEditBio] = useState('');
   const [editLocation, setEditLocation] = useState('');
   const [editWebsite, setEditWebsite] = useState('');
+  const [editCurrentPassword, setEditCurrentPassword] = useState('');
+  const [editPassword, setEditPassword] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -66,32 +69,59 @@ export default function UserProfilePage() {
     setEditBio(bio);
     setEditLocation(location);
     setEditWebsite(website);
+    setEditCurrentPassword('');
+    setEditPassword('');
+    setError(null);
     setIsEditing(true);
   };
 
   const saveProfile = async () => {
     if (!profileUser) return;
+    setError(null);
+    
+    if (editPassword && !editCurrentPassword) {
+      setError("Please enter your current password to set a new password.");
+      return;
+    }
     try {
       const updatedUser = await userService.updateUser(profileUser.id, {
         bio: editBio,
         location: editLocation,
         website: editWebsite,
+        currentPassword: editCurrentPassword,
+        password: editPassword,
       });
       setBio(updatedUser.bio || editBio);
       setLocation(updatedUser.location || editLocation);
       setWebsite(updatedUser.website || editWebsite);
-    } catch {
+      setProfileUser(updatedUser);
+      if (isOwnProfile) {
+        updateAuthUser(updatedUser);
+      }
+      setIsEditing(false);
+    } catch (err: any) {
+      if (err.response?.status === 400) {
+        setError("Current password is incorrect.");
+        return;
+      }
       // If backend is down, just update locally
-      console.log('Backend not available, saving profile locally.');
+      console.log('Backend not available or other error, saving profile locally.');
       setBio(editBio);
       setLocation(editLocation);
       setWebsite(editWebsite);
+      
+      const updatedLocalUser = { ...profileUser, bio: editBio, location: editLocation, website: editWebsite };
+      setProfileUser(updatedLocalUser);
+      if (isOwnProfile) {
+        updateAuthUser(updatedLocalUser);
+      }
+      setIsEditing(false);
     }
-    setIsEditing(false);
   };
 
   const cancelEditing = () => {
     setIsEditing(false);
+    setError(null);
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,7 +132,9 @@ export default function UserProfilePage() {
     try {
       const updatedUser = await userService.uploadAvatar(profileUser.id, file);
       setProfileUser(updatedUser);
-      // Optional: Refresh local auth state if it's the logged-in user
+      if (isOwnProfile) {
+        updateAuthUser(updatedUser);
+      }
     } catch (err) {
       console.error("Failed to upload avatar", err);
     } finally {
@@ -184,6 +216,8 @@ export default function UserProfilePage() {
               <p className="profile-bio">{bio || 'No bio yet.'}</p>
             )}
 
+            {error && <div className="error-message" style={{ color: 'red', fontSize: '0.875rem', marginBottom: '8px' }}>{error}</div>}
+
             <div className="profile-meta-row">
               <span className="meta-item">
                 <Mail size={14} /> {profileUser?.email || `${username}@tractus.dev`}
@@ -218,6 +252,28 @@ export default function UserProfilePage() {
                     <a href={website} target="_blank" rel="noreferrer">{website}</a>
                   </span>
                 )
+              )}
+              {isEditing && (
+                <>
+                  <span className="meta-item editable">
+                    <Lock size={14} />
+                    <input
+                      type="password"
+                      value={editCurrentPassword}
+                      onChange={(e) => setEditCurrentPassword(e.target.value)}
+                      placeholder="Current password"
+                    />
+                  </span>
+                  <span className="meta-item editable">
+                    <Lock size={14} />
+                    <input
+                      type="password"
+                      value={editPassword}
+                      onChange={(e) => setEditPassword(e.target.value)}
+                      placeholder="New password"
+                    />
+                  </span>
+                </>
               )}
               <span className="meta-item">
                 <Calendar size={14} /> Joined July 2026
