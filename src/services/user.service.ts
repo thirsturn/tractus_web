@@ -5,6 +5,7 @@ export interface UserUpdateData {
   bio?: string;
   location?: string;
   website?: string;
+  password?: string;
 }
 
 const userService = {

@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
-import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare, Camera } from 'lucide-react';
+import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare, Camera, Lock } from 'lucide-react';
 import ThreadCard from '../../components/ThreadCard/ThreadCard';
 import userService from '../../services/user.service';
 import type { User } from '../../types/auth.types';
@@ -36,6 +36,7 @@ export default function UserProfilePage() {
   const [editBio, setEditBio] = useState('');
   const [editLocation, setEditLocation] = useState('');
   const [editWebsite, setEditWebsite] = useState('');
+  const [editPassword, setEditPassword] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -66,6 +67,7 @@ export default function UserProfilePage() {
     setEditBio(bio);
     setEditLocation(location);
     setEditWebsite(website);
+    setEditPassword('');
     setIsEditing(true);
   };
 
@@ -76,6 +78,7 @@ export default function UserProfilePage() {
         bio: editBio,
         location: editLocation,
         website: editWebsite,
+        password: editPassword,
       });
       setBio(updatedUser.bio || editBio);
       setLocation(updatedUser.location || editLocation);
@@ -230,6 +233,17 @@ export default function UserProfilePage() {
                     <a href={website} target="_blank" rel="noreferrer">{website}</a>
                   </span>
                 )
+              )}
+              {isEditing && (
+                <span className="meta-item editable">
+                  <Lock size={14} />
+                  <input
+                    type="password"
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                    placeholder="New password..."
+                  />
+                </span>
               )}
               <span className="meta-item">
                 <Calendar size={14} /> Joined July 2026
