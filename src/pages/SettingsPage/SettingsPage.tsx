@@ -3,7 +3,7 @@ import { User, Palette, Shield, Save } from 'lucide-react';
 import './SettingsPage.css';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState('appearance');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Load initial theme state
@@ -31,12 +31,7 @@ export default function SettingsPage() {
 
       <div className="settings-layout">
         <aside className="settings-sidebar">
-          <button 
-            className={`settings-tab ${activeTab === 'profile' ? 'active' : ''}`}
-            onClick={() => setActiveTab('profile')}
-          >
-            <User size={18} /> Profile
-          </button>
+
           <button 
             className={`settings-tab ${activeTab === 'appearance' ? 'active' : ''}`}
             onClick={() => setActiveTab('appearance')}
@@ -52,31 +47,7 @@ export default function SettingsPage() {
         </aside>
 
         <main className="settings-content">
-          {activeTab === 'profile' && (
-            <div className="settings-section">
-              <h2>Profile Customization</h2>
-              <p className="section-description">Update your public profile information.</p>
-              
-              <div className="form-group">
-                <label>Bio</label>
-                <textarea className="form-input textarea" placeholder="Tell the community about yourself..." rows={4}></textarea>
-              </div>
-              
-              <div className="form-group">
-                <label>Website / Portfolio URL</label>
-                <input type="text" className="form-input" placeholder="https://" />
-              </div>
 
-              <div className="form-group">
-                <label>Twitter / X Username</label>
-                <input type="text" className="form-input" placeholder="@username" />
-              </div>
-
-              <button className="btn-save">
-                <Save size={16} /> Save Changes
-              </button>
-            </div>
-          )}
 
           {activeTab === 'appearance' && (
             <div className="settings-section">

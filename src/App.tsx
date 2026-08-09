@@ -8,9 +8,18 @@ import ThreadDetailsPage from './pages/ThreadDetailsPage/ThreadDetailsPage'
 import UserProfilePage from './pages/UserProfilePage/UserProfilePage'
 import SettingsPage from './pages/SettingsPage/SettingsPage'
 import ExplorePage from './pages/ExplorePage/ExplorePage'
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+
 function ProtectedRoute({ children }: { children: ReactNode }) {
-  // Temporarily bypassed for UI testing
-  return children;
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
 }
 
 function App() {
