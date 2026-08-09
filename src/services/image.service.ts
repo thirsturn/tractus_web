@@ -11,9 +11,10 @@ const imageService = {
     formData.append('file', file);
     
     const response = await api.post<ImageUploadResponse>('/images/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      transformRequest: [(data, headers) => {
+        delete headers['Content-Type'];
+        return data;
+      }],
     });
     
     return response.data;
