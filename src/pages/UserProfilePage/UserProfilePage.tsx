@@ -8,12 +8,7 @@ import type { User } from '../../types/auth.types';
 import type { ThreadResponse } from '../../types/thread.types';
 import './UserProfilePage.css';
 
-// Mock user posts (fallback when backend is down)
-const MOCK_USER_POSTS: ThreadResponse[] = [
-  { id: 301, title: 'My experience building a full-stack app with Spring Boot and React', spaceId: 1, author: { id: 1, username: 'user', email: 'user@test.com' } },
-  { id: 302, title: 'Best VS Code extensions for Java developers in 2026', spaceId: 2, author: { id: 1, username: 'user', email: 'user@test.com' } },
-  { id: 303, title: 'How I improved my API response times by 300%', spaceId: 1, author: { id: 1, username: 'user', email: 'user@test.com' } },
-];
+
 
 export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
@@ -50,13 +45,12 @@ export default function UserProfilePage() {
         setLocation(data.location || '');
         setWebsite(data.website || '');
       } catch {
-        // Fallback to auth context data if backend is down
-        console.log('Backend not available, using local auth data for profile.');
+        console.error('Failed to load profile from backend.');
         if (authUser) {
           setProfileUser(authUser);
-          setBio(authUser.bio || 'Passionate developer and community contributor.');
-          setLocation(authUser.location || 'San Francisco, CA');
-          setWebsite(authUser.website || 'https://tractus.dev');
+          setBio(authUser.bio || '');
+          setLocation(authUser.location || '');
+          setWebsite(authUser.website || '');
         }
       } finally {
         setIsLoading(false);
@@ -142,11 +136,8 @@ export default function UserProfilePage() {
     }
   };
 
-  // Update mock posts to use the viewed username
-  const userPosts = MOCK_USER_POSTS.map(post => ({
-    ...post,
-    author: { ...post.author, username: username || 'user' }
-  }));
+  // TODO: Fetch user's posts from backend
+  const userPosts: ThreadResponse[] = [];
 
   if (isLoading) {
     return <div className="profile-container"><div className="loading-state">Loading profile...</div></div>;

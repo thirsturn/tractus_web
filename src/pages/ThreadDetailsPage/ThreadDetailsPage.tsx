@@ -4,23 +4,6 @@ import { useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './ThreadDetailsPage.css';
 
-// Highly Realistic Mock Data
-const MOCK_THREAD_DETAIL = {
-  id: 1,
-  title: 'What is the most underrated programming language in 2026?',
-  content: 'I have been looking into languages outside of the usual JS/Python ecosystem and I keep hearing about Nim and Zig. What are your thoughts? Are there any languages that are currently flying under the radar but offer massive productivity boosts for web backend development?\n\nI feel like everyone just defaults to Go or Rust these days if they need performance, but maybe there is a better middle ground.',
-  author: {
-    username: 'TechGuru',
-    initial: 'T'
-  },
-  time: '2 hours ago',
-  stats: {
-    upvotes: 245,
-    comments: 42,
-    reposts: 12
-  }
-};
-
 interface ThreadComment {
   id: number;
   author: string;
@@ -32,22 +15,21 @@ interface ThreadComment {
   profileImageUrl?: string;
 }
 
-const INITIAL_MOCK_COMMENTS: ThreadComment[] = [
-  { id: 101, author: 'CodeNinja', initial: 'C', time: '1 hr ago', content: 'Honestly, I think Elixir is still criminally underrated. The BEAM ecosystem makes building fault-tolerant real-time systems so trivial compared to Node or Go.', upvotes: 24, hasUpvoted: false },
-  { id: 102, author: 'DataWizard', initial: 'D', time: '45 mins ago', content: 'Zig is fantastic if you are doing systems programming, but for web backends? It might be overkill. Stick to Go unless you really need that manual memory management.', upvotes: 18, hasUpvoted: false },
-  { id: 103, author: 'DesignPro', initial: 'D', time: '20 mins ago', content: 'What about Kotlin? It is huge in mobile but I feel like backend devs sleep on it. Ktor is incredibly nice to use.', upvotes: 5, hasUpvoted: false }
-];
-
 export default function ThreadDetailsPage() {
   useParams<{ id: string }>(); // Will be used later for fetching
   const { user } = useAuth();
   const [commentText, setCommentText] = useState('');
-  const [comments, setComments] = useState<ThreadComment[]>(INITIAL_MOCK_COMMENTS);
+  const [comments, setComments] = useState<ThreadComment[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   
-  // In a real app, we would fetch the thread by ID here using threadService
+  // TODO: Fetch real thread data by ID from backend
   const [thread, setThread] = useState({
-    ...MOCK_THREAD_DETAIL,
+    id: 0,
+    title: 'Loading...',
+    content: '',
+    author: { username: '', initial: '' },
+    time: '',
+    stats: { upvotes: 0, comments: 0, reposts: 0 },
     hasUpvoted: false,
     hasDownvoted: false,
     hasReposted: false,
@@ -189,7 +171,7 @@ export default function ThreadDetailsPage() {
           
           <button className="stat-btn action">
             <MessageSquare size={18} />
-            <span>{thread.stats.comments + (comments.length - INITIAL_MOCK_COMMENTS.length)} Comments</span>
+            <span>{thread.stats.comments + comments.length} Comments</span>
           </button>
           
           <button 

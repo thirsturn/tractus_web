@@ -28,6 +28,16 @@ export default function ThreadCard({ thread }: ThreadCardProps) {
         
         <h2 className="thread-title">{thread.title}</h2>
         
+        {thread.content && (
+          <p className="thread-text-content">{thread.content}</p>
+        )}
+
+        {thread.imageUrl && (
+          <div className="thread-image-container">
+            <img src={thread.imageUrl} alt="Thread attachment" className="thread-image" />
+          </div>
+        )}
+        
         <div className="thread-actions">
           <button className="action-btn" onClick={(e) => e.preventDefault()}>
             <MessageSquare size={16} />
