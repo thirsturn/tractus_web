@@ -2,8 +2,8 @@ import { useState, useRef } from 'react';
 import { X, Image as ImageIcon } from 'lucide-react';
 import './CreateThreadModal.css';
 import threadService from '../../services/thread.service';
-
 import imageService from '../../services/image.service';
+import { useAuth } from '../../context/AuthContext';
 
 interface CreateThreadModalProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ interface CreateThreadModalProps {
 }
 
 export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultSpaceId = 1 }: CreateThreadModalProps) {
+  const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [spaceId] = useState(defaultSpaceId);
@@ -47,6 +48,10 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
       setError("Title is required");
       return;
     }
+    if (!user) {
+      setError("You must be logged in to post");
+      return;
+    }
     
     setIsSubmitting(true);
     setError(null);
@@ -65,7 +70,8 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
         title, 
         spaceId,
         content,
-        imageUrl: uploadedImageUrl
+        imageUrl: uploadedImageUrl,
+        userId: user!.id
       });
       
       // Reset form
