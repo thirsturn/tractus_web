@@ -17,6 +17,14 @@ interface ThreadComment {
   profileImageUrl?: string;
 }
 
+interface ThreadViewModel extends ThreadResponse {
+  time: string;
+  stats: { upvotes: number; comments: number; reposts: number };
+  hasUpvoted: boolean;
+  hasDownvoted: boolean;
+  hasReposted: boolean;
+}
+
 export default function ThreadDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -24,7 +32,7 @@ export default function ThreadDetailsPage() {
   const [comments, setComments] = useState<ThreadComment[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   
-  const [thread, setThread] = useState<ThreadResponse | null>(null);
+  const [thread, setThread] = useState<ThreadViewModel | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +43,14 @@ export default function ThreadDetailsPage() {
       setError(null);
       try {
         const data = await threadService.getThreadById(parseInt(id, 10));
-        setThread(data);
+        setThread({
+          ...data,
+          time: 'Just now',
+          stats: { upvotes: 0, comments: 0, reposts: 0 },
+          hasUpvoted: false,
+          hasDownvoted: false,
+          hasReposted: false,
+        });
       } catch (err: any) {
         console.error('Failed to load thread:', err);
         setError('Could not load thread details.');
@@ -176,7 +191,7 @@ export default function ThreadDetailsPage() {
       {/* Main Thread Content */}
       <article className="main-post">
         <div className="post-header">
-          <div className="author-avatar">{thread.author.initial}</div>
+          <div className="author-avatar">{thread.author.username.charAt(0).toUpperCase()}</div>
           <div className="post-meta">
             <span className="author-name">{thread.author.username}</span>
             <span className="time-posted">{thread.time}</span>
@@ -186,9 +201,14 @@ export default function ThreadDetailsPage() {
 
         <h1 className="post-title">{thread.title}</h1>
         <div className="post-body">
-          {thread.content.split('\n').map((paragraph, idx) => (
+          {thread.content && thread.content.split('\n').map((paragraph, idx) => (
             <p key={idx}>{paragraph}</p>
           ))}
+          {thread.imageUrl && (
+            <div className="post-image-container">
+              <img src={thread.imageUrl} alt="Post Attachment" className="post-attached-image" />
+            </div>
+          )}
         </div>
 
         {/* Statistics Bar */}
