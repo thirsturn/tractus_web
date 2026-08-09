@@ -1,7 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowUp, ArrowDown, MessageSquare, Repeat, Share2, MoreHorizontal, Send } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import threadService from '../../services/thread.service';
+import type { ThreadResponse } from '../../types/thread.types';
 import './ThreadDetailsPage.css';
 
 interface ThreadComment {
@@ -16,24 +18,50 @@ interface ThreadComment {
 }
 
 export default function ThreadDetailsPage() {
-  useParams<{ id: string }>(); // Will be used later for fetching
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState<ThreadComment[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   
-  // TODO: Fetch real thread data by ID from backend
-  const [thread, setThread] = useState({
-    id: 0,
-    title: 'Loading...',
-    content: '',
-    author: { username: '', initial: '' },
-    time: '',
-    stats: { upvotes: 0, comments: 0, reposts: 0 },
-    hasUpvoted: false,
-    hasDownvoted: false,
-    hasReposted: false,
-  });
+  const [thread, setThread] = useState<ThreadResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadThread = async () => {
+      if (!id) return;
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await threadService.getThreadById(parseInt(id, 10));
+        setThread(data);
+      } catch (err: any) {
+        console.error('Failed to load thread:', err);
+        setError('Could not load thread details.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadThread();
+  }, [id]);
+
+  if (isLoading) {
+    return <div className="thread-details-container"><div className="loading-state">Loading...</div></div>;
+  }
+
+  if (error || !thread) {
+    return (
+      <div className="thread-details-container">
+        <div className="error-state">
+          {error || 'Thread not found'}
+          <br /><br />
+          <Link to="/" className="back-btn" style={{ justifyContent: 'center' }}>Back to Feed</Link>
+        </div>
+      </div>
+    );
+  }
 
   const handleAddComment = () => {
     if (!commentText.trim()) return;
@@ -71,38 +99,50 @@ export default function ThreadDetailsPage() {
   };
 
   const handlePostUpvote = () => {
-    setThread(prev => ({
-      ...prev,
-      hasUpvoted: !prev.hasUpvoted,
-      hasDownvoted: false,
-      stats: {
-        ...prev.stats,
-        upvotes: prev.hasUpvoted ? prev.stats.upvotes - 1 : prev.stats.upvotes + 1 + (prev.hasDownvoted ? 1 : 0)
+    if (!thread) return;
+    setThread(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        hasUpvoted: !prev.hasUpvoted,
+        hasDownvoted: false,
+        stats: {
+          ...prev.stats,
+          upvotes: prev.hasUpvoted ? prev.stats.upvotes - 1 : prev.stats.upvotes + 1 + (prev.hasDownvoted ? 1 : 0)
+        }
       }
-    }));
+    });
   };
 
   const handlePostDownvote = () => {
-    setThread(prev => ({
-      ...prev,
-      hasDownvoted: !prev.hasDownvoted,
-      hasUpvoted: false,
-      stats: {
-        ...prev.stats,
-        upvotes: prev.hasDownvoted ? prev.stats.upvotes + 1 : prev.stats.upvotes - 1 - (prev.hasUpvoted ? 1 : 0)
+    if (!thread) return;
+    setThread(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        hasDownvoted: !prev.hasDownvoted,
+        hasUpvoted: false,
+        stats: {
+          ...prev.stats,
+          upvotes: prev.hasDownvoted ? prev.stats.upvotes + 1 : prev.stats.upvotes - 1 - (prev.hasUpvoted ? 1 : 0)
+        }
       }
-    }));
+    });
   };
 
   const handleRepost = () => {
-    setThread(prev => ({
-      ...prev,
-      hasReposted: !prev.hasReposted,
-      stats: {
-        ...prev.stats,
-        reposts: prev.hasReposted ? prev.stats.reposts - 1 : prev.stats.reposts + 1
+    if (!thread) return;
+    setThread(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        hasReposted: !prev.hasReposted,
+        stats: {
+          ...prev.stats,
+          reposts: prev.hasReposted ? prev.stats.reposts - 1 : prev.stats.reposts + 1
+        }
       }
-    }));
+    });
   };
 
   const handleShare = async () => {
