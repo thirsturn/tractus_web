@@ -253,6 +253,7 @@ export default function UserProfilePage() {
                       value={editCurrentPassword}
                       onChange={(e) => setEditCurrentPassword(e.target.value)}
                       placeholder="Current password"
+                      autoComplete="new-password"
                     />
                   </span>
                   <span className="meta-item editable">
@@ -262,6 +263,7 @@ export default function UserProfilePage() {
                       value={editPassword}
                       onChange={(e) => setEditPassword(e.target.value)}
                       placeholder="New password"
+                      autoComplete="new-password"
                     />
                   </span>
                 </>
