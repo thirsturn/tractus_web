@@ -1,4 +1,4 @@
-import { MessageSquare, ArrowUp, ArrowDown } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { ThreadResponse } from '../../types/thread.types';
 import './ThreadCard.css';
@@ -15,16 +15,6 @@ export default function ThreadCard({ thread }: ThreadCardProps) {
 
   return (
     <article className="thread-card">
-      {/* Left side: Voting Controls */}
-      <div className="thread-voting">
-        <button className="vote-btn upvote">
-          <ArrowUp size={20} />
-        </button>
-        <span className="vote-count">{upvotes}</span>
-        <button className="vote-btn downvote">
-          <ArrowDown size={20} />
-        </button>
-      </div>
 
       {/* Main Content Area */}
       <Link to={`/thread/${thread.id}`} className="thread-content">
