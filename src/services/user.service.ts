@@ -1,5 +1,6 @@
 import api from './api';
 import type { User } from '../types/auth.types';
+import imageService from './image.service';
 
 export interface UserUpdateData {
   bio?: string;
@@ -7,6 +8,7 @@ export interface UserUpdateData {
   website?: string;
   currentPassword?: string;
   password?: string;
+  profileImageUrl?: string;
 }
 
 const userService = {
@@ -21,14 +23,11 @@ const userService = {
   },
 
   uploadAvatar: async (id: number, file: File): Promise<User> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await api.post<User>(`/users/${id}/avatar`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    // 1. Upload image to get URL
+    const { url } = await imageService.uploadImage(file);
+    
+    // 2. Update user profile with new image URL
+    return await userService.updateUser(id, { profileImageUrl: url });
   }
 };
 

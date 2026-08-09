@@ -3,6 +3,8 @@ import { X, Image as ImageIcon } from 'lucide-react';
 import './CreateThreadModal.css';
 import threadService from '../../services/thread.service';
 
+import imageService from '../../services/image.service';
+
 interface CreateThreadModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,8 +24,6 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // NOTE: We don't save the actual file into state yet since the API doesn't support it,
-      // we just create the preview URL for the UI!
       const url = URL.createObjectURL(file);
       setImagePreview(url);
     }
@@ -52,12 +52,20 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
     setError(null);
     
     try {
-      // NOTE: We are currently only sending JSON to the backend. 
-      // The imageFile is ignored in this API call until the backend is updated to support MultipartFormData!
+      let uploadedImageUrl = undefined;
+      const file = fileInputRef.current?.files?.[0];
+      
+      // Upload image first if one is selected
+      if (file) {
+        const { url } = await imageService.uploadImage(file);
+        uploadedImageUrl = url;
+      }
+      
       await threadService.createThread({ 
         title, 
         spaceId,
-        content 
+        content,
+        imageUrl: uploadedImageUrl
       });
       
       // Reset form
