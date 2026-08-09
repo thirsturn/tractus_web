@@ -13,12 +13,8 @@ export default function TopNav() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // Mock Notifications Data
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: 'upvote', user: 'Alex', action: 'upvoted your post', time: '5m ago', read: false, threadId: 1 },
-    { id: 2, type: 'comment', user: 'Sarah', action: 'commented on your thread', time: '1h ago', read: false, threadId: 101 },
-    { id: 3, type: 'mention', user: 'DevTeam', action: 'mentioned you in an announcement', time: '2h ago', read: true, threadId: 102 }
-  ]);
+  // TODO: Fetch real notifications from backend
+  const [notifications, setNotifications] = useState<{ id: number; type: string; user: string; action: string; time: string; read: boolean; threadId: number }[]>([]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 

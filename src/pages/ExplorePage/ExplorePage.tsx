@@ -4,17 +4,8 @@ import ThreadCard from '../../components/ThreadCard/ThreadCard';
 import type { ThreadResponse } from '../../types/thread.types';
 import './ExplorePage.css';
 
-// Mock Data
-const MOCK_TRENDING_THREADS: ThreadResponse[] = [
-  { id: 101, title: 'What is the most underrated programming language in 2026?', spaceId: 2, author: { id: 1, username: 'TechGuru', email: 'tech@test.com' } },
-  { id: 102, title: 'Tractus v2.0 Release Notes and Discussion', spaceId: 3, author: { id: 2, username: 'Admin', email: 'admin@test.com' } },
-  { id: 103, title: 'How do you handle burnout as a developer?', spaceId: 1, author: { id: 3, username: 'CodeNinja', email: 'ninja@test.com' } },
-];
-
-const MOCK_RELATED_THREADS: ThreadResponse[] = [
-  { id: 104, title: 'Just discovered an amazing new CSS framework!', spaceId: 2, author: { id: 4, username: 'DesignPro', email: 'design@test.com' } },
-  { id: 105, title: 'Upcoming community meetup in New York', spaceId: 1, author: { id: 5, username: 'EventPlanner', email: 'events@test.com' } },
-];
+const TRENDING_THREADS: ThreadResponse[] = [];
+const RELATED_THREADS: ThreadResponse[] = [];
 
 
 const POPULAR_TAGS = ['#technology', '#announcements', '#general', '#react', '#springboot', '@admin'];
@@ -23,7 +14,7 @@ export default function ExplorePage() {
   const [activeTab, setActiveTab] = useState<'trending' | 'related'>('trending');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const displayThreads = activeTab === 'trending' ? MOCK_TRENDING_THREADS : MOCK_RELATED_THREADS;
+  const displayThreads = activeTab === 'trending' ? TRENDING_THREADS : RELATED_THREADS;
 
   return (
     <div className="explore-container">
