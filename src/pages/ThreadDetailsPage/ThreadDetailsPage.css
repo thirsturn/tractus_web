@@ -175,6 +175,11 @@
   color: var(--color-text-main);
 }
 
+.stat-btn.action.active {
+  color: var(--color-primary);
+  background-color: rgba(250, 71, 122, 0.1);
+}
+
 .stat-btn.action.share {
   margin-left: auto;
 }
@@ -297,5 +302,9 @@
 }
 
 .comment-action-btn:hover {
+  color: var(--color-primary);
+}
+
+.comment-action-btn.active {
   color: var(--color-primary);
 }
