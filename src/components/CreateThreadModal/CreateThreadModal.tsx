@@ -54,13 +54,12 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
     setError(null);
     
     try {
-      // NOTE: We are currently only sending JSON to the backend. 
-      // The imageFile is ignored in this API call until the backend is updated to support MultipartFormData!
       await threadService.createThread({ 
         title, 
         spaceId,
         content,
-        userId: user!.id
+        userId: user!.id,
+        image: fileInputRef.current?.files?.[0] || undefined
       });
       
       // Reset form

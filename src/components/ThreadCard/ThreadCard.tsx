@@ -27,6 +27,18 @@ export default function ThreadCard({ thread }: ThreadCardProps) {
         
         <h2 className="thread-title">{thread.title}</h2>
         
+        {thread.content && (
+          <p className="thread-preview-text">
+            {thread.content.length > 150 ? `${thread.content.substring(0, 150)}...` : thread.content}
+          </p>
+        )}
+
+        {thread.imageUrl && (
+          <div className="thread-image-container" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+            <img src={thread.imageUrl} alt="Thread attachment" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '8px' }} />
+          </div>
+        )}
+        
         <div className="thread-actions">
           <button className="action-btn">
             <MessageSquare size={16} />
