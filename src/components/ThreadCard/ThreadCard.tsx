@@ -8,10 +8,9 @@ interface ThreadCardProps {
 }
 
 export default function ThreadCard({ thread }: ThreadCardProps) {
-  // Since the backend doesn't currently return vote/comment counts, we will use placeholders
-  // that we can hook up to real data later when the backend expands!
+  // We can hook up to real vote data later when the backend expands!
   const upvotes = Math.floor(Math.random() * 50); 
-  const commentsCount = Math.floor(Math.random() * 20);
+  const commentsCount = thread.commentCount || 0;
 
   return (
     <article className="thread-card">

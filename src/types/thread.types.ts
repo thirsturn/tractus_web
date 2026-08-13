@@ -7,4 +7,5 @@ export interface ThreadResponse {
   imageUrl?: string;
   author: User;
   spaceId: number;
+  commentCount?: number;
 }
