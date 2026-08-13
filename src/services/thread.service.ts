@@ -12,8 +12,19 @@ const threadService = {
     return response.data;
   },
   
-  createThread: async (threadData: { title: string; spaceId: number; content?: string; imageUrl?: string; userId: number }): Promise<ThreadResponse> => {
-    const response = await api.post<ThreadResponse>('/threads', threadData);
+  createThread: async (threadData: { title: string; spaceId: number; content?: string; userId: number; image?: File }): Promise<ThreadResponse> => {
+    const formData = new FormData();
+    formData.append('title', threadData.title);
+    formData.append('spaceId', threadData.spaceId.toString());
+    formData.append('userId', threadData.userId.toString());
+    if (threadData.content) formData.append('content', threadData.content);
+    if (threadData.image) formData.append('image', threadData.image);
+
+    const response = await api.post<ThreadResponse>('/threads', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   }
 };

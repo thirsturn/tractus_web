@@ -7,8 +7,6 @@ import CreateThreadModal from '../../components/CreateThreadModal/CreateThreadMo
 import { Plus } from 'lucide-react';
 import './SpaceFeedPage.css';
 
-
-
 export default function SpaceFeedPage() {
   const { id } = useParams<{ id: string }>();
   // Default to Space 1 (General) if no space is provided in the URL (e.g. Home page)
@@ -24,10 +22,12 @@ export default function SpaceFeedPage() {
     setError(null);
     try {
       const data = await threadService.getThreadsBySpace(activeSpaceId);
-      setThreads(data || []);
+      if (data) {
+        setThreads(data);
+      }
     } catch (err: any) {
-      console.error('Failed to load threads:', err);
-      setError('Could not connect to server.');
+      console.log("Backend not available or failed to fetch threads.");
+      setError("Failed to load threads from the server.");
     } finally {
       setIsLoading(false);
     }

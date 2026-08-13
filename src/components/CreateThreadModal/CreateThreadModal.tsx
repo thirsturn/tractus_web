@@ -2,7 +2,6 @@ import { useState, useRef } from 'react';
 import { X, Image as ImageIcon } from 'lucide-react';
 import './CreateThreadModal.css';
 import threadService from '../../services/thread.service';
-import imageService from '../../services/image.service';
 import { useAuth } from '../../context/AuthContext';
 
 interface CreateThreadModalProps {
@@ -57,21 +56,12 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
     setError(null);
     
     try {
-      let uploadedImageUrl = undefined;
-      const file = fileInputRef.current?.files?.[0];
-      
-      // Upload image first if one is selected
-      if (file) {
-        const { url } = await imageService.uploadImage(file);
-        uploadedImageUrl = url;
-      }
-      
       await threadService.createThread({ 
         title, 
         spaceId,
         content,
-        imageUrl: uploadedImageUrl,
-        userId: user!.id
+        userId: user.id,
+        image: fileInputRef.current?.files?.[0] || undefined
       });
       
       // Reset form

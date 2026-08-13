@@ -8,14 +8,12 @@ interface ThreadCardProps {
 }
 
 export default function ThreadCard({ thread }: ThreadCardProps) {
-  // Since the backend doesn't currently return vote/comment counts, we will use placeholders
-  // that we can hook up to real data later when the backend expands!
+  // We can hook up to real vote data later when the backend expands!
   const upvotes = Math.floor(Math.random() * 50); 
-  const commentsCount = Math.floor(Math.random() * 20);
+  const commentsCount = thread.commentCount || 0;
 
   return (
     <article className="thread-card">
-
       {/* Main Content Area */}
       <Link to={`/thread/${thread.id}`} className="thread-content">
         <div className="thread-header">
@@ -29,12 +27,14 @@ export default function ThreadCard({ thread }: ThreadCardProps) {
         <h2 className="thread-title">{thread.title}</h2>
         
         {thread.content && (
-          <p className="thread-text-content">{thread.content}</p>
+          <p className="thread-preview-text">
+            {thread.content.length > 150 ? `${thread.content.substring(0, 150)}...` : thread.content}
+          </p>
         )}
 
         {thread.imageUrl && (
-          <div className="thread-image-container">
-            <img src={thread.imageUrl} alt="Thread attachment" className="thread-image" />
+          <div className="thread-image-container" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+            <img src={thread.imageUrl} alt="Thread attachment" style={{ maxWidth: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '8px' }} />
           </div>
         )}
         
