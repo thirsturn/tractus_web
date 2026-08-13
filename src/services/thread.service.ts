@@ -7,7 +7,7 @@ const threadService = {
     return response.data;
   },
   
-  createThread: async (threadData: { title: string; spaceId: number; content?: string }): Promise<ThreadResponse> => {
+  createThread: async (threadData: { title: string; spaceId: number; content?: string; userId: number }): Promise<ThreadResponse> => {
     const response = await api.post<ThreadResponse>('/threads', threadData);
     return response.data;
   },

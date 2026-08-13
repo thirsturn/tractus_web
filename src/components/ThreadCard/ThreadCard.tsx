@@ -29,7 +29,7 @@ export default function ThreadCard({ thread }: ThreadCardProps) {
         <h2 className="thread-title">{thread.title}</h2>
         
         <div className="thread-actions">
-          <button className="action-btn" onClick={(e) => e.preventDefault()}>
+          <button className="action-btn">
             <MessageSquare size={16} />
             <span>{commentsCount} Comments</span>
           </button>

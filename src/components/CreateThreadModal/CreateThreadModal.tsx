@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { X, Image as ImageIcon } from 'lucide-react';
 import './CreateThreadModal.css';
 import threadService from '../../services/thread.service';
+import { useAuth } from '../../context/AuthContext';
 
 interface CreateThreadModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface CreateThreadModalProps {
 }
 
 export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultSpaceId = 1 }: CreateThreadModalProps) {
+  const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [spaceId] = useState(defaultSpaceId);
@@ -57,7 +59,8 @@ export default function CreateThreadModal({ isOpen, onClose, onSuccess, defaultS
       await threadService.createThread({ 
         title, 
         spaceId,
-        content 
+        content,
+        userId: user!.id
       });
       
       // Reset form
