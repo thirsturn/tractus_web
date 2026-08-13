@@ -1,25 +1,14 @@
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowUp, ArrowDown, MessageSquare, Repeat, Share2, MoreHorizontal, Send } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import threadService from '../../services/thread.service';
+import commentService from '../../services/comment.service';
+import voteService from '../../services/vote.service';
+import type { ThreadResponse } from '../../types/thread.types';
+import type { CommentResponse } from '../../types/comment.types';
+import type { VoteType } from '../../types/vote.types';
 import './ThreadDetailsPage.css';
-
-// Highly Realistic Mock Data
-const MOCK_THREAD_DETAIL = {
-  id: 1,
-  title: 'What is the most underrated programming language in 2026?',
-  content: 'I have been looking into languages outside of the usual JS/Python ecosystem and I keep hearing about Nim and Zig. What are your thoughts? Are there any languages that are currently flying under the radar but offer massive productivity boosts for web backend development?\n\nI feel like everyone just defaults to Go or Rust these days if they need performance, but maybe there is a better middle ground.',
-  author: {
-    username: 'TechGuru',
-    initial: 'T'
-  },
-  time: '2 hours ago',
-  stats: {
-    upvotes: 245,
-    comments: 42,
-    reposts: 12
-  }
-};
 
 interface ThreadComment {
   id: number;
@@ -30,100 +19,174 @@ interface ThreadComment {
   upvotes: number;
   hasUpvoted: boolean;
   profileImageUrl?: string;
+  parentCommentId?: number;
 }
 
-const INITIAL_MOCK_COMMENTS: ThreadComment[] = [
-  { id: 101, author: 'CodeNinja', initial: 'C', time: '1 hr ago', content: 'Honestly, I think Elixir is still criminally underrated. The BEAM ecosystem makes building fault-tolerant real-time systems so trivial compared to Node or Go.', upvotes: 24, hasUpvoted: false },
-  { id: 102, author: 'DataWizard', initial: 'D', time: '45 mins ago', content: 'Zig is fantastic if you are doing systems programming, but for web backends? It might be overkill. Stick to Go unless you really need that manual memory management.', upvotes: 18, hasUpvoted: false },
-  { id: 103, author: 'DesignPro', initial: 'D', time: '20 mins ago', content: 'What about Kotlin? It is huge in mobile but I feel like backend devs sleep on it. Ktor is incredibly nice to use.', upvotes: 5, hasUpvoted: false }
-];
-
 export default function ThreadDetailsPage() {
-  useParams<{ id: string }>(); // Will be used later for fetching
+  const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [commentText, setCommentText] = useState('');
-  const [comments, setComments] = useState<ThreadComment[]>(INITIAL_MOCK_COMMENTS);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [comments, setComments] = useState<ThreadComment[]>([]);
+  const [thread, setThread] = useState<ThreadResponse | null>(null);
   
-  // In a real app, we would fetch the thread by ID here using threadService
-  const [thread, setThread] = useState({
-    ...MOCK_THREAD_DETAIL,
-    hasUpvoted: false,
-    hasDownvoted: false,
-    hasReposted: false,
-  });
+  // Local state for optimistic UI updates on thread votes
+  const [threadVotes, setThreadVotes] = useState(0);
+  const [hasUpvotedThread, setHasUpvotedThread] = useState(false);
+  const [hasDownvotedThread, setHasDownvotedThread] = useState(false);
+
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [replyingTo, setReplyingTo] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (id) {
+      const threadId = parseInt(id, 10);
+      
+      // Fetch thread details
+      threadService.getThreadById(threadId)
+        .then(data => {
+          setThread(data);
+        })
+        .catch(err => console.error('Failed to fetch thread', err));
+
+      // Fetch comments
+      commentService.getCommentsByThread(threadId)
+        .then(data => {
+          const formattedComments: ThreadComment[] = data.map((c: CommentResponse) => ({
+            id: c.id,
+            author: c.author.username,
+            initial: c.author.username.charAt(0).toUpperCase(),
+            time: 'Just now', // Ideally, backend should return a timestamp
+            content: c.content,
+            upvotes: 0, // Backend doesn't include vote counts in CommentResponse by default unless joined
+            hasUpvoted: false,
+            profileImageUrl: c.author.profileImageUrl,
+            parentCommentId: c.parentCommentId
+          }));
+          setComments(formattedComments);
+        })
+        .catch(err => console.error('Failed to fetch comments', err));
+
+      // Fetch Thread Votes
+      voteService.getThreadVotes(threadId)
+        .then(votes => {
+          let up = 0;
+          let down = 0;
+          let userUpvoted = false;
+          let userDownvoted = false;
+
+          votes.forEach(v => {
+            if (v.voteType === 'UP') up++;
+            if (v.voteType === 'DOWN') down++;
+            if (user && v.userId === user.id) {
+              if (v.voteType === 'UP') userUpvoted = true;
+              if (v.voteType === 'DOWN') userDownvoted = true;
+            }
+          });
+
+          setThreadVotes(up - down);
+          setHasUpvotedThread(userUpvoted);
+          setHasDownvotedThread(userDownvoted);
+        })
+        .catch(err => console.error('Failed to fetch thread votes', err));
+    }
+  }, [id, user]);
 
   const handleAddComment = () => {
-    if (!commentText.trim()) return;
-    const newComment: ThreadComment = {
-      id: Date.now(),
-      author: user?.username || 'Guest',
-      initial: user?.username?.charAt(0).toUpperCase() || 'G',
-      profileImageUrl: user?.profileImageUrl,
-      time: 'Just now',
+    if (!commentText.trim() || !thread || !user) return;
+    
+    const threadId = parseInt(id as string, 10);
+    
+    commentService.createComment({
       content: commentText.trim(),
-      upvotes: 0,
-      hasUpvoted: false,
-    };
-    setComments([...comments, newComment]);
-    setCommentText('');
-    inputRef.current?.blur();
+      userId: user.id,
+      threadId: threadId,
+      parentCommentId: replyingTo
+    }).then(newC => {
+      const formatted: ThreadComment = {
+        id: newC.id,
+        author: newC.author.username,
+        initial: newC.author.username.charAt(0).toUpperCase(),
+        time: 'Just now',
+        content: newC.content,
+        upvotes: 0,
+        hasUpvoted: false,
+        profileImageUrl: newC.author.profileImageUrl,
+        parentCommentId: newC.parentCommentId
+      };
+      setComments([...comments, formatted]);
+      setCommentText('');
+      setReplyingTo(undefined);
+      inputRef.current?.blur();
+    }).catch(err => console.error('Error creating comment', err));
   };
 
-  const handleReply = (author: string) => {
+  const handleReply = (author: string, commentId: number) => {
+    setReplyingTo(commentId);
     setCommentText(`@${author} `);
     inputRef.current?.focus();
   };
 
-  const handleUpvote = (id: number) => {
-    setComments(comments.map(c => {
-      if (c.id === id) {
-        return {
-          ...c,
-          hasUpvoted: !c.hasUpvoted,
-          upvotes: c.hasUpvoted ? c.upvotes - 1 : c.upvotes + 1
-        };
-      }
-      return c;
-    }));
+  const handleUpvote = (commentId: number) => {
+    if (!user) return;
+    
+    voteService.castCommentVote({
+      userId: user.id,
+      targetId: commentId,
+      voteType: 'UP'
+    }).then(() => {
+      setComments(comments.map(c => {
+        if (c.id === commentId) {
+          return {
+            ...c,
+            hasUpvoted: !c.hasUpvoted,
+            upvotes: c.hasUpvoted ? c.upvotes - 1 : c.upvotes + 1
+          };
+        }
+        return c;
+      }));
+    }).catch(err => console.error('Error voting on comment', err));
   };
 
   const handlePostUpvote = () => {
-    setThread(prev => ({
-      ...prev,
-      hasUpvoted: !prev.hasUpvoted,
-      hasDownvoted: false,
-      stats: {
-        ...prev.stats,
-        upvotes: prev.hasUpvoted ? prev.stats.upvotes - 1 : prev.stats.upvotes + 1 + (prev.hasDownvoted ? 1 : 0)
+    if (!user || !thread) return;
+
+    voteService.castThreadVote({
+      userId: user.id,
+      targetId: thread.id,
+      voteType: 'UP'
+    }).then(() => {
+      if (hasUpvotedThread) {
+        setHasUpvotedThread(false);
+        setThreadVotes(prev => prev - 1);
+      } else {
+        setHasUpvotedThread(true);
+        setThreadVotes(prev => prev + 1 + (hasDownvotedThread ? 1 : 0));
+        setHasDownvotedThread(false);
       }
-    }));
+    }).catch(err => console.error('Error upvoting thread', err));
   };
 
   const handlePostDownvote = () => {
-    setThread(prev => ({
-      ...prev,
-      hasDownvoted: !prev.hasDownvoted,
-      hasUpvoted: false,
-      stats: {
-        ...prev.stats,
-        upvotes: prev.hasDownvoted ? prev.stats.upvotes + 1 : prev.stats.upvotes - 1 - (prev.hasUpvoted ? 1 : 0)
-      }
-    }));
-  };
+    if (!user || !thread) return;
 
-  const handleRepost = () => {
-    setThread(prev => ({
-      ...prev,
-      hasReposted: !prev.hasReposted,
-      stats: {
-        ...prev.stats,
-        reposts: prev.hasReposted ? prev.stats.reposts - 1 : prev.stats.reposts + 1
+    voteService.castThreadVote({
+      userId: user.id,
+      targetId: thread.id,
+      voteType: 'DOWN'
+    }).then(() => {
+      if (hasDownvotedThread) {
+        setHasDownvotedThread(false);
+        setThreadVotes(prev => prev + 1);
+      } else {
+        setHasDownvotedThread(true);
+        setThreadVotes(prev => prev - 1 - (hasUpvotedThread ? 1 : 0));
+        setHasUpvotedThread(false);
       }
-    }));
+    }).catch(err => console.error('Error downvoting thread', err));
   };
 
   const handleShare = async () => {
+    if (!thread) return;
     const shareData = {
       title: 'Tractus Thread',
       text: `Check out this thread on Tractus: "${thread.title}"`,
@@ -141,6 +204,10 @@ export default function ThreadDetailsPage() {
     }
   };
 
+  if (!thread) {
+    return <div className="thread-details-container"><p>Loading...</p></div>;
+  }
+
   return (
     <div className="thread-details-container">
       {/* Navigation Bar */}
@@ -154,33 +221,42 @@ export default function ThreadDetailsPage() {
       {/* Main Thread Content */}
       <article className="main-post">
         <div className="post-header">
-          <div className="author-avatar">{thread.author.initial}</div>
+          <div className="author-avatar" style={{ overflow: 'hidden' }}>
+            {thread.author.profileImageUrl ? (
+              <img src={thread.author.profileImageUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              thread.author.username.charAt(0).toUpperCase()
+            )}
+          </div>
           <div className="post-meta">
             <span className="author-name">{thread.author.username}</span>
-            <span className="time-posted">{thread.time}</span>
+            <span className="time-posted">Just now</span>
           </div>
           <button className="more-btn"><MoreHorizontal size={20} /></button>
         </div>
 
         <h1 className="post-title">{thread.title}</h1>
         <div className="post-body">
-          {thread.content.split('\n').map((paragraph, idx) => (
+          {thread.content?.split('\n').map((paragraph, idx) => (
             <p key={idx}>{paragraph}</p>
           ))}
+          {thread.imageUrl && (
+            <img src={thread.imageUrl} alt="Thread Attachment" style={{ maxWidth: '100%', borderRadius: '8px', marginTop: '1rem' }} />
+          )}
         </div>
 
         {/* Statistics Bar */}
         <div className="post-stats-bar">
           <div className="stat-group">
             <button 
-              className={`stat-btn upvote ${thread.hasUpvoted ? 'active' : ''}`}
+              className={`stat-btn upvote ${hasUpvotedThread ? 'active' : ''}`}
               onClick={handlePostUpvote}
             >
               <ArrowUp size={18} />
             </button>
-            <span className="stat-count">{thread.stats.upvotes}</span>
+            <span className="stat-count">{threadVotes}</span>
             <button 
-              className={`stat-btn downvote ${thread.hasDownvoted ? 'active' : ''}`}
+              className={`stat-btn downvote ${hasDownvotedThread ? 'active' : ''}`}
               onClick={handlePostDownvote}
             >
               <ArrowDown size={18} />
@@ -189,17 +265,9 @@ export default function ThreadDetailsPage() {
           
           <button className="stat-btn action">
             <MessageSquare size={18} />
-            <span>{thread.stats.comments + (comments.length - INITIAL_MOCK_COMMENTS.length)} Comments</span>
+            <span>{comments.length} Comments</span>
           </button>
           
-          <button 
-            className={`stat-btn action ${thread.hasReposted ? 'active' : ''}`}
-            onClick={handleRepost}
-          >
-            <Repeat size={18} />
-            <span>{thread.stats.reposts} Reposts</span>
-          </button>
-
           <button className="stat-btn action share" onClick={handleShare}>
             <Share2 size={18} />
             <span>Share</span>
@@ -223,9 +291,12 @@ export default function ThreadDetailsPage() {
           <div className="input-wrapper">
             <textarea 
               ref={inputRef}
-              placeholder="Add a comment..." 
+              placeholder={replyingTo ? "Write a reply..." : "Add a comment..."}
               value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
+              onChange={(e) => {
+                setCommentText(e.target.value);
+                if (e.target.value === '') setReplyingTo(undefined);
+              }}
               rows={1}
             />
             <button className="send-btn" onClick={handleAddComment} disabled={!commentText.trim()}>
@@ -262,7 +333,7 @@ export default function ThreadDetailsPage() {
                   </button>
                   <button 
                     className="comment-action-btn"
-                    onClick={() => handleReply(comment.author)}
+                    onClick={() => handleReply(comment.author, comment.id)}
                   >
                     <MessageSquare size={14} /> Reply
                   </button>
