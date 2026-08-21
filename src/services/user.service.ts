@@ -9,9 +9,15 @@ export interface UserUpdateData {
   currentPassword?: string;
   password?: string;
   profileImageUrl?: string;
+  coverImageUrl?: string;
 }
 
 const userService = {
+  getAllUsers: async (): Promise<User[]> => {
+    const response = await api.get<User[]>('/users');
+    return response.data;
+  },
+
   getUserByUsername: async (username: string): Promise<User> => {
     const response = await api.get<User>(`/users/${username}`);
     return response.data;
@@ -28,6 +34,14 @@ const userService = {
 
     // 2. Update user profile with new image URL
     return await userService.updateUser(id, { profileImageUrl: url });
+  },
+
+  uploadCover: async (id: number, file: File): Promise<User> => {
+    // 1. Upload image to get URL
+    const { url } = await imageService.uploadImage(file);
+
+    // 2. Update user profile with new cover image URL
+    return await userService.updateUser(id, { coverImageUrl: url });
   },
 
   followUser: async (username: string): Promise<void> => {
