@@ -1,23 +1,19 @@
-import { useState, useEffect } from 'react';
-import { User, Palette, Shield, Save } from 'lucide-react';
+import { useState } from 'react';
+import { Palette, Shield } from 'lucide-react';
 import './SettingsPage.css';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('appearance');
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  // Load initial theme state
-  useEffect(() => {
-    const isDark = document.body.classList.contains('dark-theme');
-    setIsDarkMode(isDark);
-  }, []);
+  const [isDarkMode, setIsDarkMode] = useState(() => document.body.classList.contains('dark-theme'));
 
   const toggleDarkMode = () => {
     if (isDarkMode) {
       document.body.classList.remove('dark-theme');
+      localStorage.setItem('darkMode', 'false');
       setIsDarkMode(false);
     } else {
       document.body.classList.add('dark-theme');
+      localStorage.setItem('darkMode', 'true');
       setIsDarkMode(true);
     }
   };

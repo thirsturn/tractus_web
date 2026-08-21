@@ -32,9 +32,12 @@ export default function ThreadDetailsPage() {
   const [threadVotes, setThreadVotes] = useState(0);
   const [hasUpvotedThread, setHasUpvotedThread] = useState(false);
   const [hasDownvotedThread, setHasDownvotedThread] = useState(false);
+  const [isVotingThread, setIsVotingThread] = useState(false);
+  const [votingCommentIds, setVotingCommentIds] = useState<Set<number>>(new Set());
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [replyingTo, setReplyingTo] = useState<number | undefined>(undefined);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -49,19 +52,31 @@ export default function ThreadDetailsPage() {
 
       // Fetch comments
       commentService.getCommentsByThread(threadId)
-        .then(data => {
+        .then(async data => {
           const formattedComments: ThreadComment[] = data.map((c: CommentResponse) => ({
             id: c.id,
             author: c.author.username,
             initial: c.author.username.charAt(0).toUpperCase(),
             time: 'Just now', // Ideally, backend should return a timestamp
             content: c.content,
-            upvotes: 0, // Backend doesn't include vote counts in CommentResponse by default unless joined
+            upvotes: 0,
             hasUpvoted: false,
             profileImageUrl: c.author.profileImageUrl,
             parentCommentId: c.parentCommentId
           }));
           setComments(formattedComments);
+
+          const votesByComment = await Promise.all(
+            formattedComments.map(c => voteService.getCommentVotes(c.id))
+          );
+          setComments(formattedComments.map((c, idx) => {
+            const votes = votesByComment[idx];
+            return {
+              ...c,
+              upvotes: votes.filter(v => v.voteType === 'UP').length,
+              hasUpvoted: !!(user && votes.some(v => v.userId === user.id && v.voteType === 'UP'))
+            };
+          }));
         })
         .catch(err => console.error('Failed to fetch comments', err));
 
@@ -126,29 +141,30 @@ export default function ThreadDetailsPage() {
   };
 
   const handleUpvote = (commentId: number) => {
-    if (!user) return;
-    
+    if (!user || votingCommentIds.has(commentId)) return;
+
+    setVotingCommentIds(prev => new Set(prev).add(commentId));
     voteService.castCommentVote({
       userId: user.id,
       targetId: commentId,
       voteType: 'UP'
-    }).then(() => {
-      setComments(comments.map(c => {
-        if (c.id === commentId) {
-          return {
-            ...c,
-            hasUpvoted: !c.hasUpvoted,
-            upvotes: c.hasUpvoted ? c.upvotes - 1 : c.upvotes + 1
-          };
-        }
-        return c;
+    }).then(async () => {
+      const votes = await voteService.getCommentVotes(commentId);
+      const upvotes = votes.filter(v => v.voteType === 'UP').length;
+      const hasUpvoted = votes.some(v => v.userId === user.id && v.voteType === 'UP');
+      setComments(comments.map(c => c.id === commentId ? { ...c, upvotes, hasUpvoted } : c));
+    }).catch(err => console.error('Error voting on comment', err))
+      .finally(() => setVotingCommentIds(prev => {
+        const next = new Set(prev);
+        next.delete(commentId);
+        return next;
       }));
-    }).catch(err => console.error('Error voting on comment', err));
   };
 
   const handlePostUpvote = () => {
-    if (!user || !thread) return;
+    if (!user || !thread || isVotingThread) return;
 
+    setIsVotingThread(true);
     voteService.castThreadVote({
       userId: user.id,
       targetId: thread.id,
@@ -162,12 +178,14 @@ export default function ThreadDetailsPage() {
         setThreadVotes(prev => prev + 1 + (hasDownvotedThread ? 1 : 0));
         setHasDownvotedThread(false);
       }
-    }).catch(err => console.error('Error upvoting thread', err));
+    }).catch(err => console.error('Error upvoting thread', err))
+      .finally(() => setIsVotingThread(false));
   };
 
   const handlePostDownvote = () => {
-    if (!user || !thread) return;
+    if (!user || !thread || isVotingThread) return;
 
+    setIsVotingThread(true);
     voteService.castThreadVote({
       userId: user.id,
       targetId: thread.id,
@@ -181,7 +199,8 @@ export default function ThreadDetailsPage() {
         setThreadVotes(prev => prev - 1 - (hasUpvotedThread ? 1 : 0));
         setHasUpvotedThread(false);
       }
-    }).catch(err => console.error('Error downvoting thread', err));
+    }).catch(err => console.error('Error downvoting thread', err))
+      .finally(() => setIsVotingThread(false));
   };
 
   const handleShare = async () => {
@@ -196,10 +215,15 @@ export default function ThreadDetailsPage() {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(shareData.url);
-        alert('Link copied to clipboard!');
+        setShareStatus('Link copied to clipboard!');
       }
     } catch (err) {
       console.error('Error sharing:', err);
+      if ((err as Error).name !== 'AbortError') {
+        setShareStatus('Unable to share this thread.');
+      }
+    } finally {
+      setTimeout(() => setShareStatus(null), 3000);
     }
   };
 
@@ -228,7 +252,7 @@ export default function ThreadDetailsPage() {
             )}
           </div>
           <div className="post-meta">
-            <span className="author-name">{thread.author.username}</span>
+            <Link to={`/profile/${thread.author.username}`} className="author-name">{thread.author.username}</Link>
             <span className="time-posted">Just now</span>
           </div>
           <button className="more-btn"><MoreHorizontal size={20} /></button>
@@ -247,16 +271,18 @@ export default function ThreadDetailsPage() {
         {/* Statistics Bar */}
         <div className="post-stats-bar">
           <div className="stat-group">
-            <button 
+            <button
               className={`stat-btn upvote ${hasUpvotedThread ? 'active' : ''}`}
               onClick={handlePostUpvote}
+              disabled={isVotingThread}
             >
               <ArrowUp size={18} />
             </button>
             <span className="stat-count">{threadVotes}</span>
-            <button 
+            <button
               className={`stat-btn downvote ${hasDownvotedThread ? 'active' : ''}`}
               onClick={handlePostDownvote}
+              disabled={isVotingThread}
             >
               <ArrowDown size={18} />
             </button>
@@ -271,6 +297,7 @@ export default function ThreadDetailsPage() {
             <Share2 size={18} />
             <span>Share</span>
           </button>
+          {shareStatus && <span className="share-status">{shareStatus}</span>}
         </div>
       </article>
 
@@ -317,16 +344,17 @@ export default function ThreadDetailsPage() {
               </div>
               <div className="comment-content-area">
                 <div className="comment-header">
-                  <span className="comment-author">{comment.author}</span>
+                  <Link to={`/profile/${comment.author}`} className="comment-author">{comment.author}</Link>
                   <span className="comment-time">{comment.time}</span>
                 </div>
                 <div className="comment-body">
                   <p>{comment.content}</p>
                 </div>
                 <div className="comment-actions">
-                  <button 
+                  <button
                     className={`comment-action-btn ${comment.hasUpvoted ? 'active' : ''}`}
                     onClick={() => handleUpvote(comment.id)}
+                    disabled={votingCommentIds.has(comment.id)}
                   >
                     <ArrowUp size={14} /> {comment.upvotes} Upvotes
                   </button>

@@ -164,6 +164,41 @@
   color: var(--color-text-main);
 }
 
+.follow-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 20px;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.follow-btn:hover {
+  background-color: #1a034d;
+}
+
+.follow-btn.following {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-main);
+}
+
+.follow-btn.following:hover {
+  border-color: #d33;
+  color: #d33;
+}
+
+.follow-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 /* Bio */
 .profile-bio {
   margin: 0 0 1rem 0;

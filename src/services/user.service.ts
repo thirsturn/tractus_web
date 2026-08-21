@@ -25,9 +25,17 @@ const userService = {
   uploadAvatar: async (id: number, file: File): Promise<User> => {
     // 1. Upload image to get URL
     const { url } = await imageService.uploadImage(file);
-    
+
     // 2. Update user profile with new image URL
     return await userService.updateUser(id, { profileImageUrl: url });
+  },
+
+  followUser: async (username: string): Promise<void> => {
+    await api.post(`/users/${username}/follow`);
+  },
+
+  unfollowUser: async (username: string): Promise<void> => {
+    await api.delete(`/users/${username}/follow`);
   }
 };
 

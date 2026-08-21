@@ -1,9 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
-import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare, Camera, Lock } from 'lucide-react';
+import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare, Camera, Lock, UserPlus, UserCheck } from 'lucide-react';
 import ThreadCard from '../../components/ThreadCard/ThreadCard';
 import userService from '../../services/user.service';
+import threadService from '../../services/thread.service';
 import type { User } from '../../types/auth.types';
 import type { ThreadResponse } from '../../types/thread.types';
 import './UserProfilePage.css';
@@ -21,6 +22,8 @@ export default function UserProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFollowPending, setIsFollowPending] = useState(false);
+  const [userPosts, setUserPosts] = useState<ThreadResponse[]>([]);
 
   // Editable fields
   const [isEditing, setIsEditing] = useState(false);
@@ -57,6 +60,10 @@ export default function UserProfilePage() {
       }
     };
     fetchProfile();
+
+    threadService.getThreadsByUser(username || '')
+      .then(setUserPosts)
+      .catch(err => console.error('Failed to load user posts', err));
   }, [username, authUser]);
 
   const startEditing = () => {
@@ -136,8 +143,23 @@ export default function UserProfilePage() {
     }
   };
 
-  // TODO: Fetch user's posts from backend
-  const userPosts: ThreadResponse[] = [];
+  const handleFollowToggle = async () => {
+    if (!profileUser || !username || isFollowPending) return;
+    setIsFollowPending(true);
+    try {
+      if (profileUser.following) {
+        await userService.unfollowUser(username);
+        setProfileUser({ ...profileUser, following: false, followerCount: Math.max(0, (profileUser.followerCount ?? 1) - 1) });
+      } else {
+        await userService.followUser(username);
+        setProfileUser({ ...profileUser, following: true, followerCount: (profileUser.followerCount ?? 0) + 1 });
+      }
+    } catch (err) {
+      console.error('Failed to update follow status', err);
+    } finally {
+      setIsFollowPending(false);
+    }
+  };
 
   if (isLoading) {
     return <div className="profile-container"><div className="loading-state">Loading profile...</div></div>;
@@ -192,6 +214,16 @@ export default function UserProfilePage() {
                     <X size={16} /> Cancel
                   </button>
                 </div>
+              )}
+              {!isOwnProfile && authUser && (
+                <button
+                  className={`follow-btn ${profileUser?.following ? 'following' : ''}`}
+                  onClick={handleFollowToggle}
+                  disabled={isFollowPending}
+                >
+                  {profileUser?.following ? <UserCheck size={16} /> : <UserPlus size={16} />}
+                  {profileUser?.following ? 'Following' : 'Follow'}
+                </button>
               )}
             </div>
 
