@@ -8,6 +8,7 @@ import ThreadDetailsPage from './pages/ThreadDetailsPage/ThreadDetailsPage'
 import UserProfilePage from './pages/UserProfilePage/UserProfilePage'
 import SettingsPage from './pages/SettingsPage/SettingsPage'
 import ExplorePage from './pages/ExplorePage/ExplorePage'
+import MessagesPage from './pages/MessagesPage/MessagesPage'
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
@@ -41,6 +42,8 @@ function App() {
           <Route path="profile/:username" element={<UserProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="explore" element={<ExplorePage />} />
+          <Route path="messages" element={<MessagesPage />} />
+          <Route path="messages/:username" element={<MessagesPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { Mail, Calendar, MapPin, LinkIcon, Edit3, Save, X, MessageSquare, Camera, Lock, UserPlus, UserCheck } from 'lucide-react';
@@ -302,14 +302,19 @@ export default function UserProfilePage() {
                 </div>
               )}
               {!isOwnProfile && authUser && (
-                <button
-                  className={`follow-btn ${profileUser?.following ? 'following' : ''}`}
-                  onClick={handleFollowToggle}
-                  disabled={isFollowPending}
-                >
-                  {profileUser?.following ? <UserCheck size={16} /> : <UserPlus size={16} />}
-                  {profileUser?.following ? 'Following' : 'Follow'}
-                </button>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <Link to={`/messages/${username}`} className="edit-profile-btn" style={{ textDecoration: 'none' }}>
+                    <MessageSquare size={16} /> Message
+                  </Link>
+                  <button
+                    className={`follow-btn ${profileUser?.following ? 'following' : ''}`}
+                    onClick={handleFollowToggle}
+                    disabled={isFollowPending}
+                  >
+                    {profileUser?.following ? <UserCheck size={16} /> : <UserPlus size={16} />}
+                    {profileUser?.following ? 'Following' : 'Follow'}
+                  </button>
+                </div>
               )}
             </div>
 
