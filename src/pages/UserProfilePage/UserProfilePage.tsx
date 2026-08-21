@@ -62,7 +62,14 @@ export default function UserProfilePage() {
     fetchProfile();
 
     threadService.getThreadsByUser(username || '')
-      .then(setUserPosts)
+      .then(posts => {
+        const sorted = posts.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return (dateB - dateA) || (b.id - a.id);
+        });
+        setUserPosts(sorted);
+      })
       .catch(err => console.error('Failed to load user posts', err));
   }, [username, authUser]);
 

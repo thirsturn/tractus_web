@@ -1,6 +1,7 @@
 import { MessageSquare } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { ThreadResponse } from '../../types/thread.types';
+import { formatPostDate } from '../../utils/date';
 import './ThreadCard.css';
 
 interface ThreadCardProps {
@@ -26,7 +27,7 @@ export default function ThreadCard({ thread }: ThreadCardProps) {
           >
             {thread.author.username}
           </Link>
-          <span className="thread-meta">• Just now</span>
+          <span className="thread-meta">• {formatPostDate(thread.createdAt)}</span>
         </div>
 
         <h2 className="thread-title">{thread.title}</h2>
