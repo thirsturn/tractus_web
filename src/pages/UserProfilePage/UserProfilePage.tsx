@@ -7,9 +7,9 @@ import userService from '../../services/user.service';
 import threadService from '../../services/thread.service';
 import type { User } from '../../types/auth.types';
 import type { ThreadResponse } from '../../types/thread.types';
+import ImageAdjustModal from '../../components/ImageAdjustModal/ImageAdjustModal';
+import { getImageUrl } from '../../utils/imageUrl';
 import './UserProfilePage.css';
-
-
 
 export default function UserProfilePage() {
   const { username } = useParams<{ username: string }>();
@@ -20,10 +20,17 @@ export default function UserProfilePage() {
   const [profileUser, setProfileUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFollowPending, setIsFollowPending] = useState(false);
   const [userPosts, setUserPosts] = useState<ThreadResponse[]>([]);
+
+  // Adjust Modal state
+  const [adjustModalOpen, setAdjustModalOpen] = useState(false);
+  const [adjustSrc, setAdjustSrc] = useState<string>('');
+  const [adjustType, setAdjustType] = useState<'avatar' | 'cover'>('avatar');
 
   // Editable fields
   const [isEditing, setIsEditing] = useState(false);
@@ -125,21 +132,62 @@ export default function UserProfilePage() {
     setError(null);
   };
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !profileUser) return;
-    
-    setIsUploadingAvatar(true);
-    try {
-      const updatedUser = await userService.uploadAvatar(profileUser.id, file);
-      setProfileUser(updatedUser);
-      if (isOwnProfile) {
-        updateAuthUser(updatedUser);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAdjustSrc(reader.result as string);
+      setAdjustType('avatar');
+      setAdjustModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleCoverFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAdjustSrc(reader.result as string);
+      setAdjustType('cover');
+      setAdjustModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleApplyAdjustedImage = async (file: File) => {
+    setAdjustModalOpen(false);
+    if (!profileUser) return;
+
+    if (adjustType === 'avatar') {
+      setIsUploadingAvatar(true);
+      try {
+        const updatedUser = await userService.uploadAvatar(profileUser.id, file);
+        setProfileUser(updatedUser);
+        if (isOwnProfile) {
+          updateAuthUser(updatedUser);
+        }
+      } catch (err) {
+        console.error("Failed to upload avatar", err);
+      } finally {
+        setIsUploadingAvatar(false);
       }
-    } catch (err) {
-      console.error("Failed to upload avatar", err);
-    } finally {
-      setIsUploadingAvatar(false);
+    } else {
+      setIsUploadingCover(true);
+      try {
+        const updatedUser = await userService.uploadCover(profileUser.id, file);
+        setProfileUser(updatedUser);
+        if (isOwnProfile) {
+          updateAuthUser(updatedUser);
+        }
+      } catch (err) {
+        console.error("Failed to upload cover photo", err);
+      } finally {
+        setIsUploadingCover(false);
+      }
     }
   };
 
@@ -169,12 +217,33 @@ export default function UserProfilePage() {
     <div className="profile-container">
       {/* Profile Header */}
       <div className="profile-header-card">
-        <div className="profile-banner"></div>
+        <div 
+          className="profile-banner"
+          style={profileUser?.coverImageUrl ? { backgroundImage: `url(${getImageUrl(profileUser.coverImageUrl)})` } : undefined}
+        >
+          {isOwnProfile && isEditing && (
+            <button 
+              className="cover-upload-btn" 
+              onClick={() => coverInputRef.current?.click()}
+              disabled={isUploadingCover}
+            >
+              <Camera size={16} />
+              {isUploadingCover ? 'Uploading...' : 'Change Cover'}
+            </button>
+          )}
+          <input 
+            type="file" 
+            ref={coverInputRef} 
+            onChange={handleCoverFileSelect} 
+            accept="image/*"
+            style={{ display: 'none' }} 
+          />
+        </div>
         <div className="profile-header-content">
           <div className="profile-avatar-wrapper">
             <div className="profile-avatar-large">
               {profileUser?.profileImageUrl ? (
-                <img src={profileUser.profileImageUrl} alt={`${username}'s avatar`} className="avatar-image" />
+                <img src={getImageUrl(profileUser.profileImageUrl)} alt={`${username}'s avatar`} className="avatar-image" />
               ) : (
                 (username || 'U').charAt(0).toUpperCase()
               )}
@@ -191,7 +260,7 @@ export default function UserProfilePage() {
             <input 
               type="file" 
               ref={fileInputRef} 
-              onChange={handleAvatarChange} 
+              onChange={handleAvatarFileSelect} 
               accept="image/*"
               style={{ display: 'none' }} 
             />
@@ -333,6 +402,15 @@ export default function UserProfilePage() {
           ))}
         </div>
       </section>
+
+      {/* Image Adjuster Modal */}
+      <ImageAdjustModal
+        isOpen={adjustModalOpen}
+        imageSrc={adjustSrc}
+        cropType={adjustType}
+        onClose={() => setAdjustModalOpen(false)}
+        onApply={handleApplyAdjustedImage}
+      />
     </div>
   );
 }

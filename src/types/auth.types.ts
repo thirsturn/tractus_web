@@ -9,6 +9,7 @@ export interface User {
   followingCount?: number;
   following?: boolean;
   profileImageUrl?: string;
+  coverImageUrl?: string;
   firstName?: string;
   lastName?: string;
   phoneNumber?: string;
