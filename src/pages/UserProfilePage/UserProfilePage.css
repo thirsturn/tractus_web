@@ -14,8 +14,34 @@
 }
 
 .profile-banner {
-  height: 140px;
+  height: 180px;
   background: linear-gradient(135deg, var(--color-primary), #6b3fa0, var(--color-secondary));
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.cover-upload-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s;
+}
+
+.cover-upload-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.8);
 }
 
 .profile-header-content {
