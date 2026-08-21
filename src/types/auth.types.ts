@@ -8,6 +8,11 @@ export interface User {
   followerCount?: number;
   followingCount?: number;
   profileImageUrl?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  dateOfBirth?: string;
+  gender?: string;
 }
 
 export interface AuthResponse {

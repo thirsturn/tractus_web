@@ -12,6 +12,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState(''); // Used only for register
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState(''); // Used only for register
+  const [lastName, setLastName] = useState(''); // Used only for register
+  const [phoneNumber, setPhoneNumber] = useState(''); // Used only for register
+  const [dateOfBirth, setDateOfBirth] = useState(''); // Used only for register
+  const [gender, setGender] = useState(''); // Used only for register
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +41,7 @@ export default function LoginPage() {
         navigate('/'); // Redirect to Dashboard
       } else {
         // Register Flow
-        await authService.register({ username, email, passwordHash: password });
+        await authService.register({ username, email, passwordHash: password, firstName, lastName, phoneNumber, dateOfBirth, gender });
         // Automatically login after successful registration
         const response = await authService.login({ username, password });
         login(response.token, response.user);
@@ -85,20 +90,84 @@ export default function LoginPage() {
             
             {!isLogin && (
               <div className="input-group">
-                <input 
-                  type="email" 
-                  placeholder="Email Address" 
-                  value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  required 
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
             )}
-            
+
+            {!isLogin && (
+              <div className="input-group">
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
+            {!isLogin && (
+              <div className="input-group">
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
+            {!isLogin && (
+              <div className="input-group">
+                <input
+                  type="tel"
+                  placeholder="Telephone Number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
+            {!isLogin && (
+              <div className="input-group">
+                <input
+                  type="date"
+                  placeholder="Date of Birth"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  required
+                />
+              </div>
+            )}
+
+            {!isLogin && (
+              <div className="input-group">
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Gender</option>
+                  <option value="Female">Female</option>
+                  <option value="Male">Male</option>
+                  <option value="Other">Other</option>
+                  <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+              </div>
+            )}
+
             <div className="input-group">
-              <input 
-                type="password" 
-                placeholder="Password (••••••••••••)" 
+              <input
+                type="password"
+                placeholder="Password (••••••••••••)"
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 required 

@@ -6,6 +6,11 @@ export interface RegisterData {
   username: string;
   email: string;
   passwordHash: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  dateOfBirth: string;
+  gender: string;
 }
 
 // The data structure required by the backend to login
