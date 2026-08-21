@@ -1,12 +1,14 @@
-import { Bell, User, LogOut, Heart, MessageSquare, AtSign, Check } from 'lucide-react';
+import { Bell, User, LogOut, Heart, MessageSquare, AtSign, Check, Sun, Moon } from 'lucide-react';
 import tractusLogo from '../../assets/Tractus.svg';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './TopNav.css';
 
 export default function TopNav() {
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   
@@ -49,6 +51,16 @@ export default function TopNav() {
       </div>
       
       <div className="topnav-actions">
+        {/* Theme Toggle Button */}
+        <button
+          className="action-btn theme-toggle-btn"
+          onClick={toggleTheme}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          aria-label="Toggle theme"
+        >
+          {isDark ? <Sun size={20} className="theme-icon sun" /> : <Moon size={20} className="theme-icon moon" />}
+        </button>
+
         <div className="notifications-container" ref={notifRef}>
           <button 
             className="action-btn"
@@ -130,6 +142,9 @@ export default function TopNav() {
               <Link to={`/profile/${user?.username}`} className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                 <User size={16} /> My Profile
               </Link>
+              <button className="dropdown-item" onClick={toggleTheme}>
+                {isDark ? <Sun size={16} /> : <Moon size={16} />} {isDark ? "Light Mode" : "Dark Mode"}
+              </button>
               <button className="dropdown-item logout-text" onClick={logout}>
                 <LogOut size={16} /> Log Out
               </button>

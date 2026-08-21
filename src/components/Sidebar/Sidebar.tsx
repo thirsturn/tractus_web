@@ -1,8 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Home, MessageSquare, Compass, Settings } from 'lucide-react';
+import { Home, MessageSquare, Compass, Settings, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 import './Sidebar.css';
 
 export default function Sidebar() {
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <aside className="sidebar">
@@ -23,6 +25,10 @@ export default function Sidebar() {
       </div>
 
       <div className="sidebar-footer">
+        <button className="nav-item theme-toggle-sidebar" onClick={toggleTheme}>
+          {isDark ? <Sun size={20} style={{ color: '#f59e0b' }} /> : <Moon size={20} style={{ color: 'var(--color-primary)' }} />}
+          <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
         <NavLink to="/settings" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
           <Settings size={20} />
           <span>Settings</span>

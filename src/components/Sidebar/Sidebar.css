@@ -49,8 +49,12 @@
 }
 
 .nav-item.active {
-  background-color: rgba(42, 6, 122, 0.05); /* very light purple */
+  background-color: var(--color-hover);
   color: var(--color-primary);
+}
+
+.theme-toggle-sidebar {
+  margin-bottom: 0.5rem;
 }
 
 .sidebar-footer {

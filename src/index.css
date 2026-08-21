@@ -18,21 +18,27 @@
   --color-surface: #ffffff;
   --color-border: #e2dce1;
   --color-hover: #f8f4f7;
+  --color-card: #ffffff;
+  --color-input-bg: #ffffff;
   
   /* Layout Dimensions */
   --sidebar-width: 260px;
   --topnav-height: 70px;
+  color-scheme: light;
 }
 
 body.dark-theme {
-  --color-primary: #8a5aff; /* Lighter Purple for dark mode */
-  --color-secondary: #ff759c; /* Bright Pink */
-  --color-background: #121212;
-  --color-surface: #1e1e1e;
-  --color-text-main: #e0e0e0;
-  --color-text-muted: #a0a0a0;
-  --color-border: #333333;
-  --color-hover: #2c2c2c;
+  --color-primary: #9d72ff; /* Lighter Purple for dark mode */
+  --color-secondary: #ff6584; /* Bright Pink */
+  --color-background: #0f0e17;
+  --color-surface: #1a1b26;
+  --color-card: #242536;
+  --color-text-main: #fffffe;
+  --color-text-muted: #a7a9be;
+  --color-border: #2e3046;
+  --color-hover: #2e3046;
+  --color-input-bg: #1a1b26;
+  color-scheme: dark;
 }
 
 body {
@@ -42,6 +48,7 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-main);
   overflow: hidden; /* We will manage scrolling in the content area */
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 * {

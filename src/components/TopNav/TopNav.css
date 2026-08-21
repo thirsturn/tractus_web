@@ -115,14 +115,34 @@
   border: 2px solid white;
 }
 
+.theme-toggle-btn {
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  background-color: var(--color-hover);
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--color-border);
+  transform: rotate(15deg);
+}
+
+.theme-icon.sun {
+  color: #f59e0b;
+}
+
+.theme-icon.moon {
+  color: var(--color-primary);
+}
+
 .notifications-dropdown {
   position: absolute;
   top: calc(100% + 0.5rem);
   right: -2rem; /* Offset to align slightly better under the bell */
   width: 340px;
-  background-color: white;
+  background-color: var(--color-surface);
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   border: 1px solid var(--color-border);
   z-index: 100;
   animation: slideDown 0.2s ease-out;
@@ -179,7 +199,7 @@
   gap: 1rem;
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--color-border);
-  background-color: white;
+  background-color: var(--color-surface);
   transition: background-color 0.2s;
   cursor: pointer;
   position: relative;
@@ -194,7 +214,7 @@
 }
 
 .notification-item.unread {
-  background-color: rgba(42, 6, 122, 0.02);
+  background-color: var(--color-hover);
 }
 
 .notification-icon {
