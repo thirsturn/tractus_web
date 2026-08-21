@@ -49,19 +49,31 @@ export default function ThreadDetailsPage() {
 
       // Fetch comments
       commentService.getCommentsByThread(threadId)
-        .then(data => {
+        .then(async data => {
           const formattedComments: ThreadComment[] = data.map((c: CommentResponse) => ({
             id: c.id,
             author: c.author.username,
             initial: c.author.username.charAt(0).toUpperCase(),
             time: 'Just now', // Ideally, backend should return a timestamp
             content: c.content,
-            upvotes: 0, // Backend doesn't include vote counts in CommentResponse by default unless joined
+            upvotes: 0,
             hasUpvoted: false,
             profileImageUrl: c.author.profileImageUrl,
             parentCommentId: c.parentCommentId
           }));
           setComments(formattedComments);
+
+          const votesByComment = await Promise.all(
+            formattedComments.map(c => voteService.getCommentVotes(c.id))
+          );
+          setComments(formattedComments.map((c, idx) => {
+            const votes = votesByComment[idx];
+            return {
+              ...c,
+              upvotes: votes.filter(v => v.voteType === 'UP').length,
+              hasUpvoted: !!(user && votes.some(v => v.userId === user.id && v.voteType === 'UP'))
+            };
+          }));
         })
         .catch(err => console.error('Failed to fetch comments', err));
 
@@ -132,17 +144,11 @@ export default function ThreadDetailsPage() {
       userId: user.id,
       targetId: commentId,
       voteType: 'UP'
-    }).then(() => {
-      setComments(comments.map(c => {
-        if (c.id === commentId) {
-          return {
-            ...c,
-            hasUpvoted: !c.hasUpvoted,
-            upvotes: c.hasUpvoted ? c.upvotes - 1 : c.upvotes + 1
-          };
-        }
-        return c;
-      }));
+    }).then(async () => {
+      const votes = await voteService.getCommentVotes(commentId);
+      const upvotes = votes.filter(v => v.voteType === 'UP').length;
+      const hasUpvoted = votes.some(v => v.userId === user.id && v.voteType === 'UP');
+      setComments(comments.map(c => c.id === commentId ? { ...c, upvotes, hasUpvoted } : c));
     }).catch(err => console.error('Error voting on comment', err));
   };
 

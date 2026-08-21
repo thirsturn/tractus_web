@@ -21,9 +21,10 @@ const threadService = {
     if (threadData.image) formData.append('image', threadData.image);
 
     const response = await api.post<ThreadResponse>('/threads', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      transformRequest: [(data, headers) => {
+        delete headers['Content-Type'];
+        return data;
+      }],
     });
     return response.data;
   }
