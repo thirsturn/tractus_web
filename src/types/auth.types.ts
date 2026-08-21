@@ -7,6 +7,7 @@ export interface User {
   website?: string;
   followerCount?: number;
   followingCount?: number;
+  following?: boolean;
   profileImageUrl?: string;
   firstName?: string;
   lastName?: string;

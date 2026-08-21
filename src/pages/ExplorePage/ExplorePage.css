@@ -63,38 +63,6 @@
   box-shadow: 0 0 0 4px rgba(42, 6, 122, 0.1);
 }
 
-.search-hub-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.4rem 0.8rem;
-  background-color: var(--color-hover);
-  border: 1px solid var(--color-border);
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.tag-pill:hover {
-  background-color: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-.tag-pill.user-tag:hover {
-  background-color: var(--color-secondary);
-  border-color: var(--color-secondary);
-}
-
 /* Trending Section */
 .trending-tabs {
   display: flex;
@@ -108,20 +76,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: none;
-  border: none;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--color-text-muted);
   padding: 0.5rem 1rem;
-  cursor: pointer;
   border-radius: 8px;
-  transition: all 0.2s;
-}
-
-.trending-tab:hover {
-  background-color: var(--color-hover);
-  color: var(--color-text-main);
 }
 
 .trending-tab.active {
@@ -135,4 +93,12 @@
   gap: 1rem;
 }
 
+.explore-status {
+  color: var(--color-text-muted);
+  padding: 1rem 0;
+}
+
+.explore-status.error {
+  color: var(--color-secondary);
+}
 

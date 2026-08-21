@@ -11,7 +11,12 @@ const threadService = {
     const response = await api.get<ThreadResponse>(`/threads/${id}`);
     return response.data;
   },
-  
+
+  getThreadsByUser: async (username: string): Promise<ThreadResponse[]> => {
+    const response = await api.get<ThreadResponse[]>(`/threads/user/${username}`);
+    return response.data;
+  },
+
   createThread: async (threadData: { title: string; spaceId: number; content?: string; userId: number; image?: File }): Promise<ThreadResponse> => {
     const formData = new FormData();
     formData.append('title', threadData.title);

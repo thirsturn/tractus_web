@@ -184,6 +184,11 @@
   margin-left: auto;
 }
 
+.share-status {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
 /* Comments Section */
 .comments-section h3 {
   font-size: 1.25rem;

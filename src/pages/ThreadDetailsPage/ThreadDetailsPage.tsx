@@ -37,6 +37,7 @@ export default function ThreadDetailsPage() {
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [replyingTo, setReplyingTo] = useState<number | undefined>(undefined);
+  const [shareStatus, setShareStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -214,10 +215,15 @@ export default function ThreadDetailsPage() {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(shareData.url);
-        alert('Link copied to clipboard!');
+        setShareStatus('Link copied to clipboard!');
       }
     } catch (err) {
       console.error('Error sharing:', err);
+      if ((err as Error).name !== 'AbortError') {
+        setShareStatus('Unable to share this thread.');
+      }
+    } finally {
+      setTimeout(() => setShareStatus(null), 3000);
     }
   };
 
@@ -246,7 +252,7 @@ export default function ThreadDetailsPage() {
             )}
           </div>
           <div className="post-meta">
-            <span className="author-name">{thread.author.username}</span>
+            <Link to={`/profile/${thread.author.username}`} className="author-name">{thread.author.username}</Link>
             <span className="time-posted">Just now</span>
           </div>
           <button className="more-btn"><MoreHorizontal size={20} /></button>
@@ -291,6 +297,7 @@ export default function ThreadDetailsPage() {
             <Share2 size={18} />
             <span>Share</span>
           </button>
+          {shareStatus && <span className="share-status">{shareStatus}</span>}
         </div>
       </article>
 
@@ -337,7 +344,7 @@ export default function ThreadDetailsPage() {
               </div>
               <div className="comment-content-area">
                 <div className="comment-header">
-                  <span className="comment-author">{comment.author}</span>
+                  <Link to={`/profile/${comment.author}`} className="comment-author">{comment.author}</Link>
                   <span className="comment-time">{comment.time}</span>
                 </div>
                 <div className="comment-body">
