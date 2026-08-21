@@ -1,27 +1,70 @@
-import { Bell, User, LogOut, Heart, MessageSquare, AtSign, Check, Sun, Moon } from 'lucide-react';
+import { Bell, User, LogOut, Heart, MessageSquare, UserPlus, Mail, Check, Sun, Moon } from 'lucide-react';
 import tractusLogo from '../../assets/Tractus.svg';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import notificationService from '../../services/notification.service';
+import type { NotificationResponse } from '../../types/notification.types';
 import './TopNav.css';
 
 export default function TopNav() {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  // TODO: Fetch real notifications from backend
-  const [notifications, setNotifications] = useState<{ id: number; type: string; user: string; action: string; time: string; read: boolean; threadId: number }[]>([]);
+  const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    try {
+      const data = await notificationService.getUserNotifications();
+      setNotifications(data);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 4000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const markAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (err) {
+      console.error('Failed to mark all as read:', err);
+    }
+  };
+
+  const handleNotificationClick = async (notif: NotificationResponse) => {
+    if (!notif.read) {
+      try {
+        await notificationService.markAsRead(notif.id);
+        setNotifications(notifications.map(n => n.id === notif.id ? { ...n, read: true } : n));
+      } catch (err) {
+        console.error('Failed to mark notification as read:', err);
+      }
+    }
+    setNotificationsOpen(false);
+
+    if (notif.targetThreadId) {
+      navigate(`/thread/${notif.targetThreadId}`);
+    } else if (notif.type === 'MESSAGE') {
+      navigate(`/messages/${notif.actor.username}`);
+    } else if (notif.type === 'FOLLOW') {
+      navigate(`/profile/${notif.actor.username}`);
+    }
   };
 
   // Close dropdowns when clicking outside
@@ -70,7 +113,7 @@ export default function TopNav() {
             }}
           >
             <Bell size={20} />
-            {unreadCount > 0 && <span className="notification-badge"></span>}
+            {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
           </button>
           
           {notificationsOpen && (
@@ -89,24 +132,26 @@ export default function TopNav() {
                   <div className="no-notifications">You're all caught up!</div>
                 ) : (
                   notifications.map(notif => (
-                    <Link 
+                    <div 
                       key={notif.id} 
-                      to={`/thread/${notif.threadId}`}
-                      onClick={() => setNotificationsOpen(false)}
+                      onClick={() => handleNotificationClick(notif)}
                       className={`notification-item ${!notif.read ? 'unread' : ''}`}
-                      style={{ textDecoration: 'none', color: 'inherit' }}
+                      style={{ cursor: 'pointer' }}
                     >
                       <div className="notification-icon">
-                        {notif.type === 'upvote' && <Heart size={16} className="text-secondary" />}
-                        {notif.type === 'comment' && <MessageSquare size={16} className="text-primary" />}
-                        {notif.type === 'mention' && <AtSign size={16} className="text-accent" />}
+                        {notif.type === 'UPVOTE' && <Heart size={16} className="text-secondary" />}
+                        {notif.type === 'COMMENT' && <MessageSquare size={16} className="text-primary" />}
+                        {notif.type === 'FOLLOW' && <UserPlus size={16} className="text-accent" />}
+                        {notif.type === 'MESSAGE' && <Mail size={16} className="text-primary" />}
                       </div>
                       <div className="notification-content">
-                        <p><strong>{notif.user}</strong> {notif.action}</p>
-                        <span className="notification-time">{notif.time}</span>
+                        <p>{notif.message}</p>
+                        <span className="notification-time">
+                          {notif.createdAt ? new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently'}
+                        </span>
                       </div>
                       {!notif.read && <div className="unread-dot"></div>}
-                    </Link>
+                    </div>
                   ))
                 )}
               </div>
