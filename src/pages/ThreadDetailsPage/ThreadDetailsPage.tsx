@@ -32,6 +32,8 @@ export default function ThreadDetailsPage() {
   const [threadVotes, setThreadVotes] = useState(0);
   const [hasUpvotedThread, setHasUpvotedThread] = useState(false);
   const [hasDownvotedThread, setHasDownvotedThread] = useState(false);
+  const [isVotingThread, setIsVotingThread] = useState(false);
+  const [votingCommentIds, setVotingCommentIds] = useState<Set<number>>(new Set());
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [replyingTo, setReplyingTo] = useState<number | undefined>(undefined);
@@ -138,8 +140,9 @@ export default function ThreadDetailsPage() {
   };
 
   const handleUpvote = (commentId: number) => {
-    if (!user) return;
-    
+    if (!user || votingCommentIds.has(commentId)) return;
+
+    setVotingCommentIds(prev => new Set(prev).add(commentId));
     voteService.castCommentVote({
       userId: user.id,
       targetId: commentId,
@@ -149,12 +152,18 @@ export default function ThreadDetailsPage() {
       const upvotes = votes.filter(v => v.voteType === 'UP').length;
       const hasUpvoted = votes.some(v => v.userId === user.id && v.voteType === 'UP');
       setComments(comments.map(c => c.id === commentId ? { ...c, upvotes, hasUpvoted } : c));
-    }).catch(err => console.error('Error voting on comment', err));
+    }).catch(err => console.error('Error voting on comment', err))
+      .finally(() => setVotingCommentIds(prev => {
+        const next = new Set(prev);
+        next.delete(commentId);
+        return next;
+      }));
   };
 
   const handlePostUpvote = () => {
-    if (!user || !thread) return;
+    if (!user || !thread || isVotingThread) return;
 
+    setIsVotingThread(true);
     voteService.castThreadVote({
       userId: user.id,
       targetId: thread.id,
@@ -168,12 +177,14 @@ export default function ThreadDetailsPage() {
         setThreadVotes(prev => prev + 1 + (hasDownvotedThread ? 1 : 0));
         setHasDownvotedThread(false);
       }
-    }).catch(err => console.error('Error upvoting thread', err));
+    }).catch(err => console.error('Error upvoting thread', err))
+      .finally(() => setIsVotingThread(false));
   };
 
   const handlePostDownvote = () => {
-    if (!user || !thread) return;
+    if (!user || !thread || isVotingThread) return;
 
+    setIsVotingThread(true);
     voteService.castThreadVote({
       userId: user.id,
       targetId: thread.id,
@@ -187,7 +198,8 @@ export default function ThreadDetailsPage() {
         setThreadVotes(prev => prev - 1 - (hasUpvotedThread ? 1 : 0));
         setHasUpvotedThread(false);
       }
-    }).catch(err => console.error('Error downvoting thread', err));
+    }).catch(err => console.error('Error downvoting thread', err))
+      .finally(() => setIsVotingThread(false));
   };
 
   const handleShare = async () => {
@@ -253,16 +265,18 @@ export default function ThreadDetailsPage() {
         {/* Statistics Bar */}
         <div className="post-stats-bar">
           <div className="stat-group">
-            <button 
+            <button
               className={`stat-btn upvote ${hasUpvotedThread ? 'active' : ''}`}
               onClick={handlePostUpvote}
+              disabled={isVotingThread}
             >
               <ArrowUp size={18} />
             </button>
             <span className="stat-count">{threadVotes}</span>
-            <button 
+            <button
               className={`stat-btn downvote ${hasDownvotedThread ? 'active' : ''}`}
               onClick={handlePostDownvote}
+              disabled={isVotingThread}
             >
               <ArrowDown size={18} />
             </button>
@@ -330,9 +344,10 @@ export default function ThreadDetailsPage() {
                   <p>{comment.content}</p>
                 </div>
                 <div className="comment-actions">
-                  <button 
+                  <button
                     className={`comment-action-btn ${comment.hasUpvoted ? 'active' : ''}`}
                     onClick={() => handleUpvote(comment.id)}
+                    disabled={votingCommentIds.has(comment.id)}
                   >
                     <ArrowUp size={14} /> {comment.upvotes} Upvotes
                   </button>
