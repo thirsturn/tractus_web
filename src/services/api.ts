@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a centralized Axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://full-lamps-doubt.loca.lt/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://tall-carpets-fry.loca.lt/api',
   headers: {
     'Content-Type': 'application/json',
     'bypass-tunnel-reminder': 'true',
