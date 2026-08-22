@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ZoomIn, ZoomOut, RotateCw, Check, X } from 'lucide-react';
 import './ImageAdjustModal.css';
 

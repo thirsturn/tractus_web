@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Send, Search, MessageSquare, User as UserIcon } from 'lucide-react';
+import { Send, Search, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import messageService from '../../services/message.service';
 import userService from '../../services/user.service';
